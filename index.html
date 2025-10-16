@@ -19,7 +19,7 @@
     --start-bot:#1d8f33;
   }
 
-  html,body{ height:100%; margin:0 }
+  html,body{ height:100%; margin:0; overflow-x:hidden }
   body{
     font-family:"VT323", ui-monospace, Menlo, Consolas, monospace;
     background:
@@ -40,8 +40,6 @@
   .boot-term{ width:min(600px,90vw); border:1px solid #0f0f0f; background:#050505; padding:14px; border-radius:10px;
               box-shadow:0 18px 48px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.05) inset; }
   .boot-line{ color:var(--lime); font-size:20px; white-space:pre-wrap; text-shadow:0 0 4px rgba(0,255,136,.35) }
-
-  /* pikselowy pasek */
   .boot-bar{ width:100%; height:16px; border:1px solid #111; border-radius:2px; background:#0b0b0b; overflow:hidden; margin-top:6px; image-rendering: pixelated; }
   .boot-fill{
     height:100%; width:0%;
@@ -51,7 +49,7 @@
     transform:translateZ(0);
   }
 
-  /* ===== WSPÓLNE OKIEN ===== */
+  /* ===== PASEK TYTUŁU ===== */
   .xpbar{
     height:34px; display:flex; align-items:center; justify-content:space-between; gap:10px; padding:0 10px;
     background: linear-gradient(#3A7BFE, #245EDC 60%, #1A4FB8); color:#eef5ff; border-bottom:1px solid rgba(0,0,0,.45);
@@ -78,7 +76,7 @@
     width:760px; max-width:96vw; background:var(--bg); color:var(--lime);
     border:1px solid #0f0f0f; border-radius:10px; overflow:hidden;
     box-shadow:0 18px 48px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.05) inset;
-    user-select:none; z-index:10; display:none; /* ukryty domyślnie */
+    user-select:none; z-index:10; display:none;
   }
   .pbody{ padding:10px 12px 12px; background:var(--panel); border-top:1px solid rgba(255,255,255,.06) }
   .np-row{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:6px }
@@ -96,16 +94,14 @@
   .xpwin{
     width: 780px; height: 460px; min-width:520px; min-height:340px;
     max-width:min(96vw,1100px); max-height:min(88vh,900px);
-    position:fixed; left:50%; top:58%; transform:translate(-50%,-58%);
+    position:fixed; left:50%; top:58%; transform:translate(-50%, -58%);
     color:var(--lime); background:var(--bg);
     border-radius:10px; overflow:hidden; z-index:50;
     border:1px solid #0f0f0f;
     box-shadow:0 24px 60px rgba(0,0,0,.6), 0 8px 22px rgba(0,0,0,.4), 0 0 0 1px rgba(255,255,255,.05) inset;
-    resize:both; display:none; /* pokaże się po boocie */
+    resize:both; display:none;
   }
-  .xpbody{
-    position:relative; height:calc(100% - 34px); background:#000; padding:18px; display:flex; flex-direction:column; gap:12px;
-  }
+  .xpbody{ position:relative; height:calc(100% - 34px); background:#000; padding:18px; display:flex; flex-direction:column; gap:12px; }
   .mainview{ display:flex; flex-direction:column; min-height:0; flex:1; }
   .menu-vertical{ display:flex; flex-direction:column; gap:14px; margin-bottom:10px }
   .item{ font-size:28px; color:var(--lime); text-shadow:0 0 4px rgba(0,255,136,.28); transition:.12s }
@@ -113,7 +109,7 @@
 
   .out{
     color:var(--lime); font-size:18px; white-space:pre-line; line-height:1.45;
-    flex:1; min-height:0; overflow:auto;  /* scroll wewnątrz terminala */
+    flex:1; min-height:0; overflow:auto;
     border-radius:8px; border:1px solid #111;
     background:#060606;
     box-shadow:inset 0 0 0 1px rgba(255,255,255,.02), inset 0 0 35px rgba(0,0,0,.55);
@@ -158,12 +154,7 @@
     margin-left:0;
   }
   .brand .ico{ width:22px; height:22px; image-rendering: pixelated }
-  .divider{
-    width:2px; height:70%; background:
-      repeating-linear-gradient(0deg, rgba(255,255,255,.6) 0 1px, rgba(255,255,255,.15) 1px 2px);
-    border-left:1px solid rgba(0,0,0,.4); border-right:1px solid rgba(0,0,0,.25);
-    border-radius:2px; margin:0 6px 0 0; image-rendering: pixelated;
-  }
+  .divider{ width:2px; height:70%; background: repeating-linear-gradient(0deg, rgba(255,255,255,.6) 0 1px, rgba(255,255,255,.15) 1px 2px); border-left:1px solid rgba(0,0,0,.4); border-right:1px solid rgba(0,0,0,.25); border-radius:2px; margin:0 6px 0 0; image-rendering: pixelated; }
   .dockapps{ display:flex; gap:8px; align-items:center; }
   .dockbtn{
     display:flex; align-items:center; gap:8px; padding:6px 10px; border-radius:8px;
@@ -187,49 +178,60 @@
 
   /* ===== MOBILE LAYOUT ===== */
   @media (max-width: 680px){
+    :root{ --mobilePad: clamp(8px, 4vw, 14px); }
     html, body { height:100%; overflow:hidden; }
+
+    /* chowamy dock całkowicie */
     .dock{ display:none !important; }
 
+    /* Terminal: pełna szerokość, wysokość ~80% ekranu, wyśrodkowany pionowo z marginesami, brak transformów */
     .xpwin{
-      position:fixed; inset:0; width:100vw; height:100vh;
-      transform:none; left:0; top:0;
-      max-width:none; max-height:none; resize:none;
-      border-radius:0; box-shadow:none; border:0;
-      z-index:80; overflow:hidden;  /* pilnujemy, żeby nic nie wyjeżdżało */
+      position:fixed;
+      left:0; right:0;
+      width:100vw; max-width:100vw;
+      /* 80% wysokości z uwzględnieniem bezpiecznych stref */
+      height: calc(80vh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+      top: calc(10vh + env(safe-area-inset-top));   /* 10% wolnej przestrzeni nad i pod */
+      transform:none;
+      border-radius:12px;
+      box-shadow:0 18px 40px rgba(0,0,0,.55);
+      border:1px solid rgba(255,255,255,.08);
+      overflow:hidden; resize:none; z-index:80;
     }
+
     .xpbar{
       cursor:default;
-      height:auto; padding:6px 8px 6px 10px;
-      display:flex; flex-direction:column; align-items:flex-start; gap:6px;
+      min-height:38px;
+      padding:6px var(--mobilePad);
+      display:flex; align-items:center; gap:10px;
     }
-    .xptitle{ margin-right:56px; } /* miejsce na przyciski po prawej */
+    .xptitle{ flex:1 1 auto; min-width:0 }
+    .xpbtns{ flex:0 0 auto; position:static; margin-left:auto }
 
-    /* przyciski w prawym górnym rogu, nie kolidują z playerem */
-    .xpbtns{
-      position:absolute; right:6px; top:6px; z-index:2;
-      margin:0;
-    }
-
-    /* player zintegrowany w ramkę */
+    /* Player w ramce, nie nachodzi na przyciski */
     #mplayer{
       display:flex; align-items:center; gap:10px;
       background:rgba(0,0,0,.18); border:1px solid rgba(0,0,0,.5);
       border-radius:6px; padding:4px 8px; color:#bfffe3; font-size:14px;
-      width:calc(100% - 12px - 56px);  /* odejmij padding i miejsce na przyciski */
+      max-width: 64%;
+      overflow:hidden;
+      white-space:nowrap; text-overflow:ellipsis;
     }
-    #mplayer-title{ cursor:pointer; text-decoration:none }
+    #mplayer-title{ cursor:pointer }
     #mplayer-state{ opacity:.85 }
 
     #mplayer-panel{
       display:none;
-      width:calc(100% - 12px - 56px);
+      width:calc(100% - 2*var(--mobilePad));
+      margin:6px var(--mobilePad) 0;
       background:#0a0a0a; border:1px solid #111; border-radius:8px; padding:10px;
       box-shadow:0 12px 30px rgba(0,0,0,.45), 0 0 0 1px rgba(255,255,255,.05) inset;
     }
     .mplayer-open #mplayer-panel{ display:block; }
 
     .xpbody{
-      padding:10px; height:calc(100vh -  (var(--barH, 34px)));  /* realnie liczy się jako pełny ekran minus titlebar */
+      padding: var(--mobilePad);
+      height: calc(100% - 38px); /* reszta pod content */
       display:flex; flex-direction:column; gap:10px; overflow:hidden;
     }
     .menu-vertical{ gap:10px; margin-bottom:8px }
@@ -263,7 +265,7 @@
   </div>
 </div>
 
-<!-- ===== PLAYER (ukryty na start, desktop) ===== -->
+<!-- ===== PLAYER (desktop) ===== -->
 <div class="playerwin" id="player-root">
   <div class="xpbar" id="pbar">
     <div class="xptitle"><span class="dot"></span>sevvyn_player.exe</div>
@@ -327,7 +329,6 @@
 
   <div class="xpbody">
     <div class="mainview" id="mainview">
-      <!-- HUB -->
       <div class="menu-vertical">
         <div class="item" data-section="beats">&gt; [beats]</div>
         <div class="item" data-section="store">&gt; [store]</div>
@@ -472,8 +473,8 @@
     handle.addEventListener('pointerup',()=>{ dragging=false; handle.style.cursor='grab'; });
     root.center = ()=>{ root.style.left='50%'; root.style.top=yPercent+'%'; root.style.transform=`translate(-50%, -${yPercent}%)`; };
   }
-  dragWindow(pRoot,pBar,9);
-  dragWindow(win,tBar,58);
+  dragWindow(pRoot, document.getElementById('pbar'), 9);
+  dragWindow(win, document.getElementById('tbar'), 58);
 
   /* ===== Player ===== */
   function fmt(t){ if(!isFinite(t)) return "00:00"; const m=Math.floor(t/60), s=Math.floor(t%60); return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`; }
@@ -514,20 +515,37 @@
     else if(act==='vol-'){ audio.volume=Math.max(0, +(audio.volume-0.1).toFixed(1)); }
     else if(act==='vol+'){ audio.volume=Math.min(1, +(audio.volume+0.1).toFixed(1)); }
   }
-  pcontrols?.addEventListener('click', e=>{ const a=e.target.closest('.pctrl'); if(a) handlePlayerAction(a.dataset.act); });
-  pcontrols?.addEventListener('keydown', e=>{ const a=e.target.closest('.pctrl'); if(a && (e.key==='Enter'||e.key===' ')){ e.preventDefault(); handlePlayerAction(a.dataset.act); }});
+  document.getElementById('pcontrols')?.addEventListener('click', e=>{ const a=e.target.closest('.pctrl'); if(a) handlePlayerAction(a.dataset.act); });
+  document.getElementById('pcontrols')?.addEventListener('keydown', e=>{ const a=e.target.closest('.pctrl'); if(a && (e.key==='Enter'||e.key===' ')){ e.preventDefault(); handlePlayerAction(a.dataset.act); }});
   function seekAt(e, bar, targetAudio){ const r=bar.getBoundingClientRect(); const x=Math.min(Math.max(0,e.clientX-r.left),r.width); targetAudio.currentTime=(targetAudio.duration||0)*(x/r.width); if(audioCtx) clickSfx(0.25,800,0.02); }
-  let seeking=false; seekBar?.addEventListener('pointerdown',e=>{ seeking=true; seekAt(e,seekBar,audio); seekBar.setPointerCapture(e.pointerId); });
-  seekBar?.addEventListener('pointermove',e=>{ if(seeking) seekAt(e,seekBar,audio) }); seekBar?.addEventListener('pointerup',()=> seeking=false);
+  let seeking=false; document.getElementById('seekBar')?.addEventListener('pointerdown',e=>{ seeking=true; seekAt(e,seekBar,audio); seekBar.setPointerCapture(e.pointerId); });
+  document.getElementById('seekBar')?.addEventListener('pointermove',e=>{ if(seeking) seekAt(e,seekBar,audio) }); document.getElementById('seekBar')?.addEventListener('pointerup',()=> seeking=false);
 
-  /* ===== Terminal: linie/pane ===== */
+  /* Mobile player toggler */
+  if (mplayer){
+    mplayer.style.display = window.matchMedia("(max-width: 680px)").matches ? 'flex' : 'none';
+    mplayerTitle?.addEventListener('click', ()=>{
+      if(audioCtx) uiClick();
+      const bar = document.getElementById('tbar');
+      bar.classList.toggle('mplayer-open');
+    });
+  }
+  document.getElementById('mplayer-panel')?.addEventListener('click', e=>{
+    const a=e.target.closest('.pctrl'); if(a) handlePlayerAction(a.dataset.act);
+  });
+  function mseekAt(e){ const r=mseekBar.getBoundingClientRect(); const x=Math.min(Math.max(0,e.clientX-r.left),r.width); audio.currentTime=(audio.duration||0)*(x/r.width); if(audioCtx) clickSfx(0.25,800,0.02); }
+  let mseeking=false;
+  mseekBar?.addEventListener('pointerdown',e=>{ mseeking=true; mseekAt(e); mseekBar.setPointerCapture(e.pointerId); });
+  mseekBar?.addEventListener('pointermove',e=>{ if(mseeking) mseekAt(e); });
+  mseekBar?.addEventListener('pointerup',()=> mseeking=false);
+
+  /* ===== Terminal treści ===== */
   const lines={
     beats:["> opening player...", "> loading tracks...", "> done_"],
     store:["> opening BeatStars portal...", "> please wait.", "> connected ✅"],
     info:["> whoami: producer from Poland", "> sound: melodic plug + digital emotion", "> links: instagram / soundcloud / mail", "> done_"],
     access:["> protected area", "> coming soon...", "> done_"]
   };
-
   function addOutLine(text=""){ const d=document.createElement('div'); d.textContent=text; out.appendChild(d); out.scrollTop=out.scrollHeight; return d; }
   function typeToNode(node, text, speed=14){
     return new Promise(res=>{
@@ -565,7 +583,6 @@
       });
     }
   }
-
   function makeClickable(selector, handler){
     paneTerm.querySelectorAll(selector).forEach(n=>{
       n.classList.add('titem'); n.tabIndex=0;
@@ -573,12 +590,10 @@
       n.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); if(audioCtx) uiClick(); handler(e); }});
     });
   }
-
   function attachBack(){
     const node=[...paneTerm.querySelectorAll('.tline')].find(n=>/\[back\]/i.test(n.textContent));
     if(node){ node.innerHTML=node.textContent.replace(/\[back\]/i,'<span class="titem" data-back>[back]</span>'); makeClickable('[data-back]', ()=> closePane()); }
   }
-
   function renderInfo(){
     return [
       `> [back]`,
@@ -591,14 +606,10 @@
       `done_`
     ];
   }
-
   async function renderPane(section){
     clearPane(); await typePaneLines([`loading /${section}...`],12,110); await sleep(200);
-
     if(section==='info'){
-      const list = renderInfo();
-      await typePaneLines(list);
-      attachBack();
+      const list = renderInfo(); await typePaneLines(list); attachBack();
       [...paneTerm.querySelectorAll('.tline')].forEach(n=>{
         const t=n.textContent.toLowerCase();
         if(t.includes('instagram.com')) n.innerHTML=`> <a class="titem" href="https://instagram.com/sevvyn" target="_blank" rel="noopener">[instagram.com/sevvyn]</a>`;
@@ -607,13 +618,8 @@
       });
       return;
     }
-
-    if(section==='access'){
-      await typePaneLines([`> [back]`,`> restricted module`,`> [coming soon]`,`done_`]);
-      attachBack(); return;
-    }
+    if(section==='access'){ await typePaneLines([`> [back]`,`> restricted module`,`> [coming soon]`,`done_`]); attachBack(); return; }
   }
-
   function openPane(key){ paneTitle.textContent=`/${key}`; mainview.classList.add('hidden'); pane.classList.remove('hidden'); requestAnimationFrame(()=> pane.classList.add('show')); renderPane(key); }
   function closePane(){ pane.classList.remove('show'); setTimeout(()=>{ pane.classList.add('hidden'); mainview.classList.remove('hidden'); },160); }
 
@@ -648,11 +654,10 @@
   function handleHubAction(section){
     if(section==='beats'){
       if (window.matchMedia("(max-width: 680px)").matches){
-        /* mobile: włącz player w ramce */
         if (!audio.src) loadTrackByIndex(0);
         audio.play().catch(()=>{});
-        mplayer.classList.add('mplayer-open');
         document.getElementById('tbar').classList.add('mplayer-open');
+        mplayer.style.display='flex';
       } else {
         if (isHidden(pRoot)) showPlayer({ play:true }); else { if (!audio.src) loadTrackByIndex(0); audio.play().catch(()=>{}); }
       }
@@ -665,7 +670,8 @@
   document.querySelectorAll('.menu-vertical .item').forEach(el=>{
     el.tabIndex=0;
     el.addEventListener('click', ()=>{
-      const key=el.dataset.section; if(audioCtx) uiClick();
+      const key=el.dataset.section;
+      if(audioCtx) uiClick();
       if(key==='store'){ handleHubAction(key); } else {
         typeOutLines(lines[key]||["> done_"]);
         handleHubAction(key);
@@ -719,24 +725,6 @@
   dockTerm?.addEventListener('click', ()=>{ if(getComputedStyle(win).display==='none'){ restoreFixed('terminal'); } else { minimizeFixed('terminal'); } });
   dockPlayer?.addEventListener('click', ()=>{ if(getComputedStyle(pRoot).display==='none'){ restoreFixed('player'); } else { minimizeFixed('player'); } });
 
-  /* Mobile player toggler */
-  if (mplayer){
-    mplayer.style.display = window.matchMedia("(max-width: 680px)").matches ? 'flex' : 'none';
-    mplayerTitle?.addEventListener('click', ()=>{
-      if(audioCtx) uiClick();
-      const bar = document.getElementById('tbar');
-      bar.classList.toggle('mplayer-open');
-    });
-  }
-  document.getElementById('mplayer-panel')?.addEventListener('click', e=>{
-    const a=e.target.closest('.pctrl'); if(a) handlePlayerAction(a.dataset.act);
-  });
-  function mseekAt(e){ const r=mseekBar.getBoundingClientRect(); const x=Math.min(Math.max(0,e.clientX-r.left),r.width); audio.currentTime=(audio.duration||0)*(x/r.width); if(audioCtx) clickSfx(0.25,800,0.02); }
-  let mseeking=false;
-  mseekBar?.addEventListener('pointerdown',e=>{ mseeking=true; mseekAt(e); mseekBar.setPointerCapture(e.pointerId); });
-  mseekBar?.addEventListener('pointermove',e=>{ if(mseeking) mseekAt(e); });
-  mseekBar?.addEventListener('pointerup',()=> mseeking=false);
-
   /* zegar */
   function tick(){ const d=new Date(); if(clock) clock.textContent=String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); }
   tick(); setInterval(tick,30*1000);
@@ -769,7 +757,6 @@
           if (!window.matchMedia("(max-width: 680px)").matches){
             dock.style.opacity='1'; dock.style.transform='translateY(0)'; win.center?.();
           } else {
-            /* pokaż mobilny pasek playera */
             mplayer.style.display='flex';
           }
           loadTrackByIndex(0);     // preload
