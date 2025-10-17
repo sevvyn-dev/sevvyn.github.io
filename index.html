@@ -4,6 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>sevvyn_xp</title>
+<link rel="preload" as="image" href="https://dl.dropboxusercontent.com/scl/fi/r60fnewmpi6oh4oqzvhik/tapeta.png?rlkey=g7qzaiy3x53phk960jf8niwmu&st=c37hnbz2">
 <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
 <style>
   :root{
@@ -19,16 +20,22 @@
     --start-bot:#1d8f33;
   }
 
-  /* TAPETA */
+  /* TAPETA: stała warstwa (działa w in-app IG) */
   html,body{ height:100%; margin:0 }
   body{
     font-family:"VT323", ui-monospace, Menlo, Consolas, monospace;
+    background-color:#0a0a0a;
+    overflow-x:hidden;
+  }
+  .wallpaper{
+    position:fixed; inset:0;
     background:
       linear-gradient(180deg, rgba(0,0,0,.20), rgba(0,0,0,.38)),
       url("https://dl.dropboxusercontent.com/scl/fi/r60fnewmpi6oh4oqzvhik/tapeta.png?rlkey=g7qzaiy3x53phk960jf8niwmu&st=c37hnbz2")
-      center/cover no-repeat fixed;
-    background-color:#0a0a0a;
-    overflow-x:hidden;
+      center/cover no-repeat;
+    z-index:-1;
+    pointer-events:none;
+    transform:translateZ(0); /* iOS/IG: wymuś rasteryzację */
   }
   *{ box-sizing:border-box }
 
@@ -59,20 +66,11 @@
   }
   .xptitle{ display:flex; align-items:center; gap:8px; font-weight:700; letter-spacing:.2px; text-shadow:0 1px 0 rgba(0,0,0,.35) }
 
-  /* DIODA STATUSU (kolory sterowane klasami) */
+  /* DIODA STATUSU */
   .xptitle .dot{ width:10px; height:10px; border-radius:50%; background: radial-gradient(circle at 30% 30%, #fff, #6AB3FF 40%, #1A5CE0 70%); box-shadow:0 0 6px rgba(106,179,255,.9) }
-  .xptitle .dot.green{
-    background: radial-gradient(circle at 30% 30%, #fff, #7affc2 40%, #11c46a 70%);
-    box-shadow:0 0 8px rgba(0,255,136,.9), 0 0 3px rgba(0,255,136,.6);
-  }
-  .xptitle .dot.orange{
-    background: radial-gradient(circle at 30% 30%, #fff, #ffd27a 40%, #c48711 70%);
-    box-shadow:0 0 8px rgba(255,173,51,.9), 0 0 3px rgba(255,173,51,.6);
-  }
-  .xptitle .dot.red{
-    background: radial-gradient(circle at 30% 30%, #fff, #ff9aa1 40%, #c4112a 70%);
-    box-shadow:0 0 8px rgba(255,51,102,.9), 0 0 3px rgba(255,51,102,.6);
-  }
+  .xptitle .dot.green{ background: radial-gradient(circle at 30% 30%, #fff, #7affc2 40%, #11c46a 70%); box-shadow:0 0 8px rgba(0,255,136,.9), 0 0 3px rgba(0,255,136,.6) }
+  .xptitle .dot.orange{ background: radial-gradient(circle at 30% 30%, #fff, #ffd27a 40%, #c48711 70%); box-shadow:0 0 8px rgba(255,173,51,.9), 0 0 3px rgba(255,173,51,.6) }
+  .xptitle .dot.red{ background: radial-gradient(circle at 30% 30%, #fff, #ff9aa1 40%, #c4112a 70%); box-shadow:0 0 8px rgba(255,51,102,.9), 0 0 3px rgba(255,51,102,.6) }
 
   .xpbtns{ display:flex; gap:6px }
   .xpbtns button{
@@ -92,7 +90,7 @@
     width:760px; max-width:96vw; background:var(--bg); color:var(--lime);
     border:1px solid #0f0f0f; border-radius:10px; overflow:hidden;
     box-shadow:0 18px 48px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.05) inset;
-    user-select:none; z-index:10; display:none; /* ukryty domyślnie */
+    user-select:none; z-index:10; display:none;
   }
   .pbody{ padding:10px 12px 12px; background:var(--panel); border-top:1px solid rgba(255,255,255,.06) }
   .np-row{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:6px }
@@ -110,12 +108,13 @@
   .xpwin{
     width: 780px; height: 460px; min-width:520px; min-height:340px;
     max-width:min(96vw,1100px); max-height:min(88vh,900px);
-    position:fixed; left:50%; top:58%; transform:translate(-50%,-58%);
+    position:fixed; left:50%; top:58%; transform:translate(-50%,,-58%);
     color:var(--lime); background:var(--bg);
     border-radius:10px; overflow:hidden; z-index:9;
     border:1px solid #0f0f0f;
     box-shadow:0 24px 60px rgba(0,0,0,.6), 0 8px 22px rgba(0,0,0,.4), 0 0 0 1px rgba(255,255,255,.05) inset;
-    resize:both; display:none; /* pokaże się po boocie */
+    resize:both; display:none;
+    transform:translate(-50%, -58%);
   }
 
   .xpbody{
@@ -231,16 +230,14 @@
            rgba(255,255,255,.08);
          border:1px solid rgba(0,0,0,.45); border-radius:8px; font-family:"VT323",monospace; image-rendering: pixelated }
 
-  /* ===== GLOBAL: mobilny pasek domyślnie ukryty ===== */
-  .mobile-sticky{ display:none; }
-
   /* ===== MOBILE LAYOUT (<=900px) ===== */
+  .mobile-sticky{ display:none; }
   @media (max-width: 900px){
     :root{ --mobilePad:clamp(8px,4vw,14px); --headH:44px; --mbarH:44px; }
     html,body{height:100%;overflow:hidden}
     .dock{display:none!important}
 
-    /* Sticky TOP player bar (poza terminalem) */
+    /* Sticky TOP player bar */
     .mobile-sticky{
       position:fixed;
       top:env(safe-area-inset-top);
@@ -264,7 +261,7 @@
       position:fixed;
       top:calc(10svh + env(safe-area-inset-top));
       left:0; right:0; margin:0 auto;
-      width:95vw; max-width:95vw;              /* ~5% tapety po bokach */
+      width:95vw; max-width:95vw;
       height:calc(80svh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
       min-width:0 !important;
       min-height:0 !important;
@@ -285,15 +282,8 @@
       .xpwin{ width:95dvw; max-width:95dvw; }
     }
 
-    .xpbar{
-      cursor:default;
-      height:var(--headH);
-      padding:6px var(--mobilePad);
-      display:flex; align-items:center; gap:8px;
-      justify-content:space-between;
-    }
+    .xpbar{ cursor:default; height:var(--headH); padding:6px var(--mobilePad); display:flex; align-items:center; gap:8px; justify-content:space-between; }
 
-    /* Na telefonie przyciski X,_ pełny kolor, ale bez akcji */
     .xpbtns button{ pointer-events:none; opacity:1; cursor:not-allowed; }
 
     .xpbody{
@@ -305,21 +295,17 @@
     }
 
     .mainview{ height:100%; min-height:0; overflow:hidden; display:flex; flex-direction:column; gap:10px; }
-    .cli{
-      position:absolute; left:var(--mobilePad); right:var(--mobilePad); bottom:var(--mobilePad);
-      z-index:3; height:44px; display:flex; align-items:center;
-    }
-
+    .cli{ position:absolute; left:var(--mobilePad); right:var(--mobilePad); bottom:var(--mobilePad); z-index:3; height:44px; display:flex; align-items:center; }
     .menu-vertical{gap:14px}
     .item{font-size:30px;padding:6px 2px;line-height:1.1}
-
     .out{ flex:1 1 auto; min-height:0; overflow:auto; }
-
     .playerwin{ display:none !important; }
   }
 </style>
 </head>
 <body>
+
+<div class="wallpaper" aria-hidden="true"></div>
 
 <!-- ===== BOOT ===== -->
 <div class="boot" id="boot">
@@ -396,18 +382,13 @@
 
   <div class="xpbody">
     <div class="mainview" id="mainview">
-      <!-- HUB -->
       <div class="menu-vertical">
         <div class="item" data-section="beats">&gt; [beats]</div>
         <div class="item" data-section="store">&gt; [store]</div>
         <div class="item" data-section="info">&gt; [info]</div>
         <div class="item" data-section="access">&gt; [access] <span class="cursor">▌</span></div>
       </div>
-
-      <!-- LOGI -->
       <div id="terminal-output" class="out"></div>
-
-      <!-- CLI -->
       <div class="cli"><span class="chev">›</span><input id="cli-input" autocomplete="off" spellcheck="false" placeholder="type a command (help)" /></div>
     </div>
 
@@ -464,7 +445,6 @@
 </div>
 
 <script>
-  /* ===== TRACKI ===== */
   const TRACKS = [
     { title: "conjuring.wav — dark / 160bpm", src: "https://dl.dropboxusercontent.com/scl/fi/rp9hsoathv890oeqlo369/conjuring.wav?rlkey=drop65f2v7engr45pesls8fac&st=071c94p5" },
     { title: "always_happy.wav — dreamy / 150bpm", src: "https://cdn.example.com/audio/always_happy.mp3" },
@@ -473,7 +453,7 @@
   const BEATSTARS_URL = "https://www.beatstars.com/sevvyn_";
   const isMobile = () => window.matchMedia("(max-width: 900px)").matches;
 
-  /* ===== WebAudio SFX ===== */
+  /* WebAudio SFX */
   let audioCtx=null, comp, master;
   const active = new Set(); const MAX_VOICES=6;
   function initAudio(){ if(audioCtx) return;
@@ -507,7 +487,6 @@
   document.addEventListener('pointerdown', primeAudio, {once:true});
   document.addEventListener('keydown', primeAudio, {once:true});
 
-  /* Drag helper (desktop only) */
   function dragWindow(root, handle, yPercent){
     let sx=0, sy=0, dragging=false;
     handle.addEventListener('pointerdown',(e)=>{
@@ -520,14 +499,12 @@
     root.center = ()=>{ root.style.left='50%'; root.style.top=yPercent+'%'; root.style.transform=`translate(-50%, -${yPercent}%)`; };
   }
 
-  /* ===== PLAYER ===== */
   const pRoot=document.getElementById('player-root'), pBar=document.getElementById('pbar');
   const pMin=document.getElementById('pmin'), pMax=document.getElementById('pmax'), pClose=document.getElementById('pclose');
   const audio=document.getElementById('audio'), nowPlaying=document.getElementById('nowPlaying'), ptime=document.getElementById('ptime');
   const seekBar=document.getElementById('seekBar'), loadedEl=document.getElementById('loaded'), playedEl=document.getElementById('played');
   const pcontrols=document.getElementById('pcontrols'), playToggle=document.getElementById('playToggle'), pmute=document.getElementById('pmute');
 
-  /* STICKY MOBILE PLAYER BAR refs */
   const mbar = document.getElementById('mobile-player');
   const mplay = document.getElementById('mplay');
   const mnext = document.getElementById('mnext');
@@ -535,18 +512,12 @@
   const mstate = document.getElementById('mstate');
   const mhide = document.getElementById('mhide');
 
-  /* DIODA statusu */
   const statusDot = document.getElementById('statusDot');
   function setStatusDot(){
-    if(!statusDot) return;
     statusDot.classList.remove('green','orange','red');
-    if (audio.src && !audio.paused) {
-      statusDot.classList.add('green');         // gra
-    } else if (audio.currentTime > 0 && audio.paused) {
-      statusDot.classList.add('orange');        // pauza
-    } else {
-      statusDot.classList.add('red');           // stop / nic nie zagrano
-    }
+    if (audio.src && !audio.paused) statusDot.classList.add('green');
+    else if (audio.currentTime > 0 && audio.paused) statusDot.classList.add('orange');
+    else statusDot.classList.add('red');
   }
 
   function fmt(t){ if(!isFinite(t)) return "00:00"; const m=Math.floor(t/60), s=Math.floor(t%60); return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`; }
@@ -577,9 +548,8 @@
   audio.addEventListener('play', ()=>{ cancelAnimationFrame(rafId); playToggle.textContent='[‖]'; setStatusDot(); uiUpdate(); });
   audio.addEventListener('pause', ()=>{ cancelAnimationFrame(rafId); playToggle.textContent='[▶︎]'; setStatusDot(); });
   audio.addEventListener('loadedmetadata', ()=> { setStatusDot(); uiUpdate(); });
-  audio.addEventListener('ended', ()=>{ /* auto-next już ustawia play -> zielone */ nextTrack(); });
+  audio.addEventListener('ended', ()=>{ nextTrack(); });
 
-  /* ===== TERMINAL ===== */
   const win=document.getElementById('xp-root'), tBar=document.getElementById('tbar');
   const minBtn=document.getElementById('min'), maxBtn=document.getElementById('max'), closeBtn=document.getElementById('close');
   const out=document.getElementById('terminal-output'), cli=document.getElementById('cli-input');
@@ -601,7 +571,6 @@
     access:["> protected area", "> coming soon...", "> done_"]
   };
 
-  /* Typowanie pojedynczej linii do LOGÓW */
   function typeWriteLineToLogs(text, speed=14){
     return new Promise(resolve=>{
       const line=document.createElement('div'); out.appendChild(line);
@@ -720,9 +689,9 @@
 
     if (isMobile()){
       await typeWriteLineToLogs("> switching to BeatStars...", 14);
-      location.href = "https://www.beatstars.com/sevvyn_";
+      location.href = BEATSTARS_URL;
     } else {
-      window.open("https://www.beatstars.com/sevvyn_", "_blank", "noopener,noreferrer");
+      window.open(BEATSTARS_URL, "_blank", "noopener,noreferrer");
       await typeWriteLineToLogs("> opening portal in new tab...", 14);
       await typeWriteLineToLogs("> done_", 14);
     }
@@ -796,7 +765,6 @@
   mnext.addEventListener('click', ()=> handlePlayerAction('next'));
   mhide.addEventListener('click', ()=>{ document.body.classList.remove('player-open'); });
 
-  /* ===== Dock sterowanie (desktop) ===== */
   const dock=document.getElementById('dock');
   const dockTerm=document.getElementById('dock-term'), dockPlayer=document.getElementById('dock-player');
 
@@ -830,12 +798,10 @@
   dockTerm.addEventListener('click', ()=>{ if(win.style.display==='none'){ restoreFixed('terminal'); } else { minimizeFixed('terminal'); } });
   dockPlayer.addEventListener('click', ()=>{ if(pRoot.style.display==='none'){ restoreFixed('player'); } else { minimizeFixed('player'); } });
 
-  // zegar
   const clock=document.getElementById('clock');
   function tick(){ const d=new Date(); clock.textContent=String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); }
   tick(); setInterval(tick,30*1000);
 
-  /* ===== BOOT sekwencja ===== */
   function typeTo(el, text, speed=16){
     return new Promise(res=>{
       let i=0; const iv=setInterval(()=>{ el.textContent=text.slice(0,++i); if(audioCtx && (i%3===0)) typeTick(); if(i>=text.length){ clearInterval(iv); res(); } }, speed);
@@ -862,8 +828,8 @@
           document.getElementById('xp-root').style.display='block';
           if(!isMobile()){ dock.style.opacity='1'; dock.style.transform='translateY(0)'; }
           if (!isMobile() && win.center) win.center();
-          loadTrackByIndex(0);   // bez autoplay
-          setStatusDot();        // start: czerwony
+          loadTrackByIndex(0);
+          setStatusDot();
           typeLines(["> Welcome to SevvynOS", "> type 'beats' to open BeatStars"]);
           if(audioCtx) bootChime();
         }, 280);
@@ -872,7 +838,6 @@
   }
   boot();
 
-  /* Seek bar handlers */
   function seekAt(e){ const r=seekBar.getBoundingClientRect(); const x=Math.min(Math.max(0,e.clientX-r.left),r.width); audio.currentTime=(audio.duration||0)*(x/r.width); if(audioCtx) clickSfx(0.25,800,0.02); setStatusDot(); }
   let seeking=false; seekBar.addEventListener('pointerdown',e=>{ seeking=true; seekAt(e); seekBar.setPointerCapture(e.pointerId); });
   seekBar.addEventListener('pointermove',e=>{ if(seeking) seekAt(e) }); seekBar.addEventListener('pointerup',()=> seeking=false);
