@@ -152,7 +152,7 @@
   /* Pane + hover na .titem (również [back]) */
   .tline{ white-space:pre-wrap }
   .titem{ display:inline; color:var(--lime); cursor:pointer; padding:2px 2px; border-radius:4px; transition:color .12s, text-shadow .12s, background-color .12s }
-  .titem:hover, .titem:focus{ outline:0; color:var(--pink); text-shadow:0 0 8px rgba(255,51,153,.35); background:rgba(255,51,153,.08) }
+  .titem:hover, .titem:focus{ outline:0; color:#ff6fb3; text-shadow:0 0 8px rgba(255,111,179,.35); background:rgba(255,111,179,.08) }
 
   .pane{ position:absolute; inset:0; display:flex; opacity:0; transform:scale(.985); pointer-events:none; transition: opacity .18s ease, transform .18s ease }
   .pane.show{ opacity:1; transform:scale(1); pointer-events:auto }
@@ -224,6 +224,24 @@
     html,body{height:100%;overflow:hidden}
     .dock{display:none!important}
 
+    /* Sticky TOP player bar (poza terminalem) */
+    .mobile-sticky{
+      position:fixed;
+      top:env(safe-area-inset-top);
+      left:0; right:0;
+      height:var(--mbarH);
+      background:linear-gradient(#2F69F4, #1F52D6 60%, #1842B0); /* ciemniejszy niż pasek okna */
+      border-bottom:1px solid rgba(0,0,0,.5);
+      color:#e8fff5;
+      padding:6px var(--mobilePad);
+      display:none;
+      align-items:center; gap:12px;
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+      z-index:1000;
+    }
+    body.player-open .mobile-sticky{ display:flex; }
+
+    /* Terminal okno pod sticky */
     .xpwin{
       position:fixed;
       top:calc(10svh + env(safe-area-inset-top));
@@ -239,6 +257,11 @@
       box-shadow:0 18px 40px rgba(0,0,0,.55);
       overflow:hidden;
       display:block;
+      z-index: 900;
+    }
+    body.player-open .xpwin{
+      top:calc(10svh + env(safe-area-inset-top) + var(--mbarH));
+      height:calc(80svh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - var(--mbarH));
     }
     @supports (width: 95dvw){
       .xpwin{ width:95dvw; max-width:95dvw; }
@@ -255,20 +278,6 @@
     /* Na telefonie przyciski X,_ pełny kolor, ale nieaktywne */
     .xpbtns button{ pointer-events:none; opacity:1; cursor:not-allowed; }
 
-    /* DRUGI PASEK: player pod tytułem, minimalnie ciemniejszy */
-    .mobile-playerbar{
-      display:none; /* pokażemy JS-em */
-      height:var(--mbarH);
-      background:linear-gradient(#2F69F4, #1F52D6 60%, #1842B0); /* ciemniejszy od paska nad nim */
-      border-bottom:1px solid rgba(0,0,0,.5);
-      color:#e8fff5;
-      padding:6px var(--mobilePad);
-      display:flex; align-items:center; gap:12px;
-      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-    }
-    .mobile-playerbar .mini-btn{ cursor:pointer; user-select:none }
-    .mobile-playerbar .mini-title{ overflow:hidden; text-overflow:ellipsis; }
-
     .xpbody{
       padding:var(--mobilePad);
       padding-bottom: calc(var(--mobilePad) + 56px);
@@ -276,7 +285,6 @@
       position:relative;
       display:flex;flex-direction:column;gap:10px;overflow:hidden;min-height:0;
     }
-    .xpwin.player-open .xpbody{ height:calc(100% - var(--headH) - var(--mbarH)); }
 
     .mainview{ height:100%; min-height:0; overflow:hidden; display:flex; flex-direction:column; gap:10px; }
     .cli{
@@ -315,6 +323,15 @@
     <div class="boot-line" id="b3"></div>
     <div class="boot-bar"><div class="boot-fill" id="bfill"></div></div>
   </div>
+</div>
+
+<!-- ===== STICKY MOBILE PLAYER BAR ===== -->
+<div class="mobile-sticky" id="mobile-player">
+  <span id="mplay" class="mini-btn">[▶︎]</span>
+  <span id="mnext" class="mini-btn">[next]</span>
+  <span class="mini-title" id="mtitle" style="overflow:hidden;text-overflow:ellipsis;">[player]</span>
+  <span id="mstate" style="opacity:.85"></span>
+  <span id="mhide" class="mini-btn" style="margin-left:auto">[hide]</span>
 </div>
 
 <!-- ===== PLAYER (okno desktop) ===== -->
@@ -357,15 +374,6 @@
       <button id="max" title="Maximize">□</button>
       <button id="close" class="close" title="Close">X</button>
     </div>
-  </div>
-
-  <!-- DRUGI PASEK: player mobilny -->
-  <div class="mobile-playerbar" id="mobile-player" style="display:none">
-    <span id="mplay" class="mini-btn">[▶︎]</span>
-    <span id="mnext" class="mini-btn">[next]</span>
-    <span class="mini-title" id="mtitle">[player]</span>
-    <span id="mstate" style="opacity:.85"></span>
-    <span id="mhide" class="mini-btn" style="margin-left:auto">[hide]</span>
   </div>
 
   <div class="xpbody">
@@ -501,7 +509,7 @@
   const seekBar=document.getElementById('seekBar'), loadedEl=document.getElementById('loaded'), playedEl=document.getElementById('played');
   const pcontrols=document.getElementById('pcontrols'), playToggle=document.getElementById('playToggle'), pmute=document.getElementById('pmute');
 
-  /* MOBILE PLAYER BAR */
+  /* STICKY MOBILE PLAYER BAR refs */
   const mbar = document.getElementById('mobile-player');
   const mplay = document.getElementById('mplay');
   const mnext = document.getElementById('mnext');
@@ -552,8 +560,7 @@
   mplay.addEventListener('click', ()=> handlePlayerAction('play'));
   mnext.addEventListener('click', ()=> handlePlayerAction('next'));
   mhide.addEventListener('click', ()=>{
-    mbar.style.display='none';
-    document.getElementById('xp-root').classList.remove('player-open');
+    document.body.classList.remove('player-open');
   });
 
   /* ===== TERMINAL ===== */
@@ -563,9 +570,7 @@
   const mainview=document.getElementById('mainview'), pane=document.getElementById('pane'), paneTitle=document.getElementById('paneTitle'), paneTerm=document.getElementById('paneTerm');
 
   function applyBindings(){
-    if (isMobile()){
-      // brak drag na mobile
-    } else {
+    if (!isMobile()){
       dragWindow(pRoot, document.getElementById('pbar'), 9);
       dragWindow(win, tBar, 58);
     }
@@ -686,9 +691,7 @@
     document.getElementById('dock-player')?.classList.add('active');
   }
   function showPlayerMobile(){
-    const mbar = document.getElementById('mobile-player');
-    mbar.style.display='flex';
-    document.getElementById('xp-root').classList.add('player-open');
+    document.body.classList.add('player-open');
   }
 
   /* STORE: typowanie + pauza 1.5s, a potem:
