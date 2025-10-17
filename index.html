@@ -359,7 +359,7 @@
     </div>
   </div>
 
-  <!-- DRUGI PASEK: player mobilny pod paskiem tytułu (na mobile pokazuje JS) -->
+  <!-- DRUGI PASEK: player mobilny -->
   <div class="mobile-playerbar" id="mobile-player" style="display:none">
     <span id="mplay" class="mini-btn">[▶︎]</span>
     <span id="mnext" class="mini-btn">[next]</span>
@@ -580,7 +580,7 @@
     access:["> protected area", "> coming soon...", "> done_"]
   };
 
-  /* Typowanie pojedynczej linii do LOGÓW (z tym samym „stukaniem”) */
+  /* Typowanie pojedynczej linii do LOGÓW */
   function typeWriteLineToLogs(text, speed=14){
     return new Promise(resolve=>{
       const line=document.createElement('div'); out.appendChild(line);
@@ -691,7 +691,9 @@
     document.getElementById('xp-root').classList.add('player-open');
   }
 
-  /* STORE: teraz typowane jak „beats” + pauza 1.5s przed open() */
+  /* STORE: typowanie + pauza 1.5s, a potem:
+     - MOBILE: przekierowanie w TEJ SAMEJ karcie (location.href)
+     - DESKTOP: nowa karta (window.open) */
   async function runStoreFlowInLogs(){
     out.textContent = "";
     await typeWriteLineToLogs("> opening BeatStars portal...", 14);
@@ -700,9 +702,15 @@
     await sleep(1500);
     await typeWriteLineToLogs("> connected ✅", 14);
     await sleep(300);
-    window.open(BEATSTARS_URL, "_blank", "noopener,noreferrer");
-    await typeWriteLineToLogs("> opening portal in new tab...", 14);
-    await typeWriteLineToLogs("> done_", 14);
+
+    if (isMobile()){
+      await typeWriteLineToLogs("> switching to BeatStars...", 14);
+      location.href = BEATSTARS_URL;           // ta sama karta na telefonie
+    } else {
+      window.open(BEATSTARS_URL, "_blank", "noopener,noreferrer"); // desktop: nowa karta
+      await typeWriteLineToLogs("> opening portal in new tab...", 14);
+      await typeWriteLineToLogs("> done_", 14);
+    }
   }
 
   function handleHubAction(section){
