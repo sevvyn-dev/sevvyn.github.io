@@ -4,7 +4,6 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>sevvyn_xp</title>
-<link rel="preload" as="image" href="https://dl.dropboxusercontent.com/scl/fi/r60fnewmpi6oh4oqzvhik/tapeta.png?rlkey=g7qzaiy3x53phk960jf8niwmu&st=c37hnbz2">
 <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
 <style>
   :root{
@@ -20,7 +19,7 @@
     --start-bot:#1d8f33;
   }
 
-  /* TAPETA: stała warstwa (działa w in-app IG) */
+  /* TAPETA: IMG + overlay (działa w IG in-app) */
   html,body{ height:100%; margin:0 }
   body{
     font-family:"VT323", ui-monospace, Menlo, Consolas, monospace;
@@ -28,15 +27,17 @@
     overflow-x:hidden;
   }
   .wallpaper{
-    position:fixed; inset:0;
-    background:
-      linear-gradient(180deg, rgba(0,0,0,.20), rgba(0,0,0,.38)),
-      url("https://dl.dropboxusercontent.com/scl/fi/r60fnewmpi6oh4oqzvhik/tapeta.png?rlkey=g7qzaiy3x53phk960jf8niwmu&st=c37hnbz2")
-      center/cover no-repeat;
-    z-index:-1;
-    pointer-events:none;
-    transform:translateZ(0); /* iOS/IG: wymuś rasteryzację */
+    position:fixed; inset:0; z-index:-1; pointer-events:none;
   }
+  .wallpaper img{
+    position:absolute; inset:0; width:100%; height:100%;
+    object-fit:cover; image-rendering:auto; transform:translateZ(0);
+  }
+  .wallpaper::after{
+    content:""; position:absolute; inset:0;
+    background:linear-gradient(180deg, rgba(0,0,0,.20), rgba(0,0,0,.38));
+  }
+
   *{ box-sizing:border-box }
 
   /* ===== BOOT OVERLAY ===== */
@@ -108,13 +109,12 @@
   .xpwin{
     width: 780px; height: 460px; min-width:520px; min-height:340px;
     max-width:min(96vw,1100px); max-height:min(88vh,900px);
-    position:fixed; left:50%; top:58%; transform:translate(-50%,,-58%);
+    position:fixed; left:50%; top:58%; transform:translate(-50%, -58%);
     color:var(--lime); background:var(--bg);
     border-radius:10px; overflow:hidden; z-index:9;
     border:1px solid #0f0f0f;
     box-shadow:0 24px 60px rgba(0,0,0,.6), 0 8px 22px rgba(0,0,0,.4), 0 0 0 1px rgba(255,255,255,.05) inset;
     resize:both; display:none;
-    transform:translate(-50%, -58%);
   }
 
   .xpbody{
@@ -283,7 +283,6 @@
     }
 
     .xpbar{ cursor:default; height:var(--headH); padding:6px var(--mobilePad); display:flex; align-items:center; gap:8px; justify-content:space-between; }
-
     .xpbtns button{ pointer-events:none; opacity:1; cursor:not-allowed; }
 
     .xpbody{
@@ -305,7 +304,11 @@
 </head>
 <body>
 
-<div class="wallpaper" aria-hidden="true"></div>
+<!-- TAPETA IMG -->
+<div class="wallpaper" aria-hidden="true">
+  <img src="https://dl.dropboxusercontent.com/scl/fi/r60fnewmpi6oh4oqzvhik/tapeta.png?rlkey=g7qzaiy3x53phk960jf8niwmu&st=c37hnbz2"
+       alt="" fetchpriority="high" decoding="async" referrerpolicy="no-referrer">
+</div>
 
 <!-- ===== BOOT ===== -->
 <div class="boot" id="boot">
