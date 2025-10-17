@@ -103,40 +103,65 @@
     box-shadow:0 24px 60px rgba(0,0,0,.6), 0 8px 22px rgba(0,0,0,.4), 0 0 0 1px rgba(255,255,255,.05) inset;
     resize:both; display:none; /* pokaże się po boocie */
   }
-  .xpbody{ position:relative; padding:18px 18px 56px; height:calc(100% - 34px); background:#000; overflow:hidden; display:flex; flex-direction:column; gap:12px }
-  .menu-vertical{ display:flex; flex-direction:column; gap:14px; margin-bottom:4px }
+
+  .xpbody{
+    position:relative;
+    height:calc(100% - 34px);
+    background:#000;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    padding:18px 18px 14px;
+    overflow:hidden;
+    min-height:0;
+  }
+  .mainview{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    height:100%;
+    min-height:0;
+  }
+
+  .menu-vertical{ display:flex; flex-direction:column; gap:14px; margin-bottom:0 }
   .item{ font-size:28px; color:var(--lime); text-shadow:0 0 4px rgba(0,255,136,.28); transition:.12s }
   .item:hover{ color:var(--pink); transform:translateX(3px); cursor:pointer }
+
   .out{
     color:var(--lime); font-size:18px; white-space:pre-line; line-height:1.45;
-    flex:1 1 auto; min-height:120px; overflow:auto;
+    flex:1 1 auto;
+    min-height:160px;
+    overflow:auto;
     border-radius:8px; border:1px solid #111;
     background:#060606;
     box-shadow:inset 0 0 0 1px rgba(255,255,255,.02), inset 0 0 35px rgba(0,0,0,.55);
     padding:12px 14px;
+    min-width:0;
   }
   .cli{
     position:relative; height:40px; display:flex; align-items:center; gap:10px;
     border-radius:8px; border:1px solid #111; background:#060606; box-shadow:inset 0 0 0 1px rgba(255,255,255,.02);
-    padding:0 12px; color:var(--lime); flex:0 0 auto;
+    padding:0 12px; color:var(--lime);
+    flex:0 0 auto;
   }
   .chev{ color:var(--lime); font-size:22px }
   #cli-input{ flex:1; background:transparent; border:none; outline:none; font-family:"VT323",monospace; font-size:22px; letter-spacing:.2px; color:#e6fff4; caret-color:var(--pink) }
   .cursor{ display:inline-block; width:9px; background:var(--lime); animation:blink .9s step-end infinite }
   @keyframes blink{ 50%{opacity:0} }
 
-  /* Overlay/pane */
+  /* Pane + hover na .titem (również [back]) */
+  .tline{ white-space:pre-wrap }
+  .titem{ display:inline; color:var(--lime); cursor:pointer; padding:2px 2px; border-radius:4px; transition:color .12s, text-shadow .12s, background-color .12s }
+  .titem:hover, .titem:focus{ outline:0; color:var(--pink); text-shadow:0 0 8px rgba(255,51,153,.35); background:rgba(255,51,153,.08) }
+
   .pane{ position:absolute; inset:0; display:flex; opacity:0; transform:scale(.985); pointer-events:none; transition: opacity .18s ease, transform .18s ease }
   .pane.show{ opacity:1; transform:scale(1); pointer-events:auto }
   .hidden{ display:none }
   .pane-chrome{ display:flex; flex-direction:column; width:100%; border:1px solid #111; border-radius:10px; background:#000; overflow:hidden }
   .pane-titlebar{ height:28px; display:flex; align-items:center; gap:8px; padding:0 10px; background:var(--blue-d); color:#eef5ff; border-bottom:1px solid rgba(0,0,0,.55) }
   .pane-term{ flex:1; padding:12px; overflow:auto; background:#060606; color:var(--lime); font-size:20px; line-height:1.45; border-top:1px solid #111 }
-  .tline{ white-space:pre-wrap }
-  .titem{ display:inline; color:var(--lime); cursor:pointer; padding:2px 2px; border-radius:4px; transition:color .12s, text-shadow .12s, background-color .12s }
-  .titem:hover, .titem:focus{ outline:0; color:var(--pink); text-shadow:0 0 8px rgba(255,51,153,.35); background:rgba(255,51,153,.08) }
 
-  /* ===== DOCK ===== */
+  /* ===== DOCK (desktop only) ===== */
   .dock{
     position:fixed; left:0; right:0; bottom:0; height:46px; display:flex; align-items:center;
     background: linear-gradient(var(--task-top), var(--task-bot));
@@ -146,8 +171,7 @@
     font-family:"VT323",monospace;
     opacity:0; transform:translateY(8px); transition:.25s ease;
   }
-  .brand{
-    height:100%; display:flex; align-items:center; gap:10px; padding:0 18px 0 12px;
+  .brand{ height:100%; display:flex; align-items:center; gap:10px; padding:0 18px 0 12px;
     color:#fff; background: linear-gradient(var(--start-top), var(--start-bot));
     border:1px solid rgba(0,0,0,.45); border-radius:0 12px 12px 0;
     font-size:22px; text-shadow:0 1px 0 rgba(0,0,0,.4);
@@ -155,14 +179,10 @@
     margin-left:0;
   }
   .brand .ico{ width:22px; height:22px; image-rendering: pixelated }
-
-  .divider{
-    width:2px; height:70%; background:
+  .divider{ width:2px; height:70%; background:
       repeating-linear-gradient(0deg, rgba(255,255,255,.6) 0 1px, rgba(255,255,255,.15) 1px 2px);
     border-left:1px solid rgba(0,0,0,.4); border-right:1px solid rgba(0,0,0,.25);
-    border-radius:2px; margin:0 6px 0 0; image-rendering: pixelated;
-  }
-
+    border-radius:2px; margin:0 6px 0 0; image-rendering: pixelated; }
   .dockapps{ display:flex; gap:8px; align-items:center; }
   .dockbtn{
     display:flex; align-items:center; gap:8px; padding:6px 10px; border-radius:8px;
@@ -198,26 +218,18 @@
            rgba(255,255,255,.08);
          border:1px solid rgba(0,0,0,.45); border-radius:8px; font-family:"VT323",monospace; image-rendering: pixelated }
 
-  /* Dock responsywny desktop */
-  .dock { gap: 8px; }
-  .brand { flex: 0 0 auto; }
-  .dockapps { flex: 1 1 auto; min-width: 0; }
-  .tray { flex: 0 0 auto; }
-
-  /* ===== MOBILE LAYOUT FIX (<=900px) ===== */
+  /* ===== MOBILE LAYOUT (<=900px) ===== */
   @media (max-width: 900px){
-    :root{ --mobilePad:clamp(8px,4vw,14px) }
+    :root{ --mobilePad:clamp(8px,4vw,14px); --headH:44px; --mbarH:44px; }
     html,body{height:100%;overflow:hidden}
     .dock{display:none!important}
 
-    /* Terminal jako jedna aplikacja, 80svh, szerokość = viewport */
     .xpwin{
       position:fixed;
       top:calc(10svh + env(safe-area-inset-top));
       left:0; right:0; margin:0 auto;
+      width:95vw; max-width:95vw;              /* 5% tapety po bokach */
       height:calc(80svh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
-      width:100vw;
-      max-width:100vw;
       min-width:0 !important;
       min-height:0 !important;
       transform:none !important;
@@ -225,34 +237,58 @@
       border-radius:12px;
       border:1px solid rgba(255,255,255,.08);
       box-shadow:0 18px 40px rgba(0,0,0,.55);
-      overflow-x:hidden;
-      display:block;  /* po boocie pokażemy JS-em, ale dla bezpieczeństwa */
+      overflow:hidden;
+      display:block;
     }
-    @supports (width: 100dvw){
-      .xpwin{ width:100dvw; max-width:100dvw; }
+    @supports (width: 95dvw){
+      .xpwin{ width:95dvw; max-width:95dvw; }
     }
 
-    .xpwin *, .xpbody, .mainview, .out, .cli { min-width:0; }
+    .xpbar{
+      cursor:default;
+      height:var(--headH);
+      padding:6px var(--mobilePad);
+      display:flex; align-items:center; gap:8px;
+      justify-content:space-between;
+    }
 
-    .xpbar{cursor:default;min-height:38px;padding:6px var(--mobilePad);display:flex;align-items:center;gap:10px}
-    .xptitle{flex:1 1 auto;min-width:0}
-    .xpbtns{flex:0 0 auto;margin-left:auto}
+    /* Na telefonie przyciski X,_ pełny kolor, ale nieaktywne */
+    .xpbtns button{ pointer-events:none; opacity:1; cursor:not-allowed; }
 
-    /* Player POD tytułem */
-    #mplayer-wrap{display:block;padding:6px var(--mobilePad) 0}
-    #mplayer{display:flex;align-items:center;gap:10px;background:rgba(0,0,0,.18);border:1px solid rgba(0,0,0,.5);border-radius:6px;padding:6px 10px;color:#bfffe3;font-size:14px;width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
-    #mplayer-title{cursor:pointer}
-    #mplayer-state{opacity:.85}
-    #mplayer-panel{display:none;width:calc(100% - 2*var(--mobilePad));margin:6px var(--mobilePad) 0;background:#0a0a0a;border:1px solid #111;border-radius:8px;padding:10px;box-shadow:0 12px 30px rgba(0,0,0,.45),0 0 0 1px rgba(255,255,255,.05) inset}
-    .mplayer-open #mplayer-panel{display:block}
+    /* DRUGI PASEK: player pod tytułem, minimalnie ciemniejszy */
+    .mobile-playerbar{
+      display:none; /* pokażemy JS-em */
+      height:var(--mbarH);
+      background:linear-gradient(#2F69F4, #1F52D6 60%, #1842B0); /* ciemniejszy od paska nad nim */
+      border-bottom:1px solid rgba(0,0,0,.5);
+      color:#e8fff5;
+      padding:6px var(--mobilePad);
+      display:flex; align-items:center; gap:12px;
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    }
+    .mobile-playerbar .mini-btn{ cursor:pointer; user-select:none }
+    .mobile-playerbar .mini-title{ overflow:hidden; text-overflow:ellipsis; }
 
-    .xpbody{padding:var(--mobilePad);height:calc(100% - 38px);display:flex;flex-direction:column;gap:10px;overflow:hidden}
-    .menu-vertical{gap:10px;margin-bottom:8px}
-    .item{font-size:22px}
-    .out{flex:1;min-height:0;overflow:auto}
-    .cli{flex:0 0 auto}
+    .xpbody{
+      padding:var(--mobilePad);
+      padding-bottom: calc(var(--mobilePad) + 56px);
+      height:calc(100% - var(--headH));
+      position:relative;
+      display:flex;flex-direction:column;gap:10px;overflow:hidden;min-height:0;
+    }
+    .xpwin.player-open .xpbody{ height:calc(100% - var(--headH) - var(--mbarH)); }
 
-    /* Okno playera desktopowego chowamy na mobile */
+    .mainview{ height:100%; min-height:0; overflow:hidden; display:flex; flex-direction:column; gap:10px; }
+    .cli{
+      position:absolute; left:var(--mobilePad); right:var(--mobilePad); bottom:var(--mobilePad);
+      z-index:3; height:44px; display:flex; align-items:center;
+    }
+
+    .menu-vertical{gap:14px}
+    .item{font-size:30px;padding:6px 2px;line-height:1.1}
+
+    .out{ flex:1 1 auto; min-height:0; overflow:auto; }
+
     .playerwin{ display:none !important; }
   }
 </style>
@@ -298,7 +334,7 @@
     </div>
     <div class="pcontrols" id="pcontrols" aria-label="player controls">
       <span class="pctrl" tabindex="0" data-act="prev">[prev]</span><span class="psep">|</span>
-      <span class="pctrl" tabindex="0" data-act="play" id="playToggle">[play]</span><span class="psep">|</span>
+      <span class="pctrl" tabindex="0" data-act="play" id="playToggle">[▶︎]</span><span class="psep">|</span>
       <span class="pctrl" tabindex="0" data-act="next">[next]</span><span class="psep">|</span>
       <span class="pctrl" tabindex="0" data-act="mute" id="pmute">[mute]</span><span class="psep">|</span>
       <span class="pctrl" tabindex="0" data-act="vol-">[vol-]</span>
@@ -323,25 +359,13 @@
     </div>
   </div>
 
-  <!-- Mobilny pasek playera POD tytułem (desktop: ukryty przez media query) -->
-  <div id="mplayer-wrap" style="display:none">
-    <div id="mplayer">
-      <span id="mplayer-title">[player]</span>
-      <span id="mplayer-song">–</span>
-      <span id="mplayer-state"></span>
-    </div>
-    <div id="mplayer-panel">
-      <div class="pcontrols" id="pcontrols_mob" aria-label="player controls (mobile)">
-        <span class="pctrl" tabindex="0" data-act="prev">[prev]</span><span class="psep">|</span>
-        <span class="pctrl" tabindex="0" data-act="play" id="playToggle_m">[play]</span><span class="psep">|</span>
-        <span class="pctrl" tabindex="0" data-act="next">[next]</span><span class="psep">|</span>
-        <span class="pctrl" tabindex="0" data-act="mute" id="pmute_m">[mute]</span>
-      </div>
-      <div class="bar" id="seekBar_m" aria-label="Seek (mobile)">
-        <div class="bar-load" id="loaded_m"></div>
-        <div class="bar-fill" id="played_m"></div>
-      </div>
-    </div>
+  <!-- DRUGI PASEK: player mobilny pod paskiem tytułu (na mobile pokazuje JS) -->
+  <div class="mobile-playerbar" id="mobile-player" style="display:none">
+    <span id="mplay" class="mini-btn">[▶︎]</span>
+    <span id="mnext" class="mini-btn">[next]</span>
+    <span class="mini-title" id="mtitle">[player]</span>
+    <span id="mstate" style="opacity:.85"></span>
+    <span id="mhide" class="mini-btn" style="margin-left:auto">[hide]</span>
   </div>
 
   <div class="xpbody">
@@ -353,9 +377,14 @@
         <div class="item" data-section="info">&gt; [info]</div>
         <div class="item" data-section="access">&gt; [access] <span class="cursor">▌</span></div>
       </div>
+
+      <!-- LOGI -->
       <div id="terminal-output" class="out"></div>
+
+      <!-- CLI -->
       <div class="cli"><span class="chev">›</span><input id="cli-input" autocomplete="off" spellcheck="false" placeholder="type a command (help)" /></div>
     </div>
+
     <div class="pane hidden" id="pane">
       <div class="pane-chrome">
         <div class="pane-titlebar"><div class="xptitle"><span class="dot"></span><span id="paneTitle">/</span></div></div>
@@ -416,6 +445,7 @@
     { title: "crystal_castles.mp3 — glitchy / 155bpm", src: "https://cdn.example.com/audio/crystal_castles.mp3" }
   ];
   const BEATSTARS_URL = "https://www.beatstars.com/sevvyn_";
+  const isMobile = () => window.matchMedia("(max-width: 900px)").matches;
 
   /* ===== WebAudio SFX ===== */
   let audioCtx=null, comp, master;
@@ -451,9 +481,6 @@
   document.addEventListener('pointerdown', primeAudio, {once:true});
   document.addEventListener('keydown', primeAudio, {once:true});
 
-  /* ===== HELPERY ===== */
-  const isMobile = () => window.matchMedia("(max-width: 900px)").matches;
-
   /* Drag helper (desktop only) */
   function dragWindow(root, handle, yPercent){
     let sx=0, sy=0, dragging=false;
@@ -474,44 +501,39 @@
   const seekBar=document.getElementById('seekBar'), loadedEl=document.getElementById('loaded'), playedEl=document.getElementById('played');
   const pcontrols=document.getElementById('pcontrols'), playToggle=document.getElementById('playToggle'), pmute=document.getElementById('pmute');
 
-  /* Mobile "header player" refs */
-  const mpWrap = document.getElementById('mplayer-wrap');
-  const mp = document.getElementById('mplayer');
-  const mpTitle = document.getElementById('mplayer-title');
-  const mpSong = document.getElementById('mplayer-song');
-  const mpState = document.getElementById('mplayer-state');
-  const mpPanel = document.getElementById('mplayer-panel');
-  const pcontrols_m = document.getElementById('pcontrols_mob');
-  const playToggle_m = document.getElementById('playToggle_m');
-  const pmute_m = document.getElementById('pmute_m');
-  const seekBar_m = document.getElementById('seekBar_m');
-  const loadedEl_m = document.getElementById('loaded_m');
-  const playedEl_m = document.getElementById('played_m');
+  /* MOBILE PLAYER BAR */
+  const mbar = document.getElementById('mobile-player');
+  const mplay = document.getElementById('mplay');
+  const mnext = document.getElementById('mnext');
+  const mtitle = document.getElementById('mtitle');
+  const mstate = document.getElementById('mstate');
+  const mhide = document.getElementById('mhide');
 
   function fmt(t){ if(!isFinite(t)) return "00:00"; const m=Math.floor(t/60), s=Math.floor(t%60); return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`; }
+  const cleanTitle = t => t.split(' —')[0].split(' -')[0];
   let rafId=null, currentIndex=0;
+
   function uiUpdate(){
     const d=audio.duration||0, c=audio.currentTime||0;
     ptime.textContent=`${fmt(c)} / ${fmt(d)}`;
     playedEl.style.width = `${(d?c/d:0)*100}%`;
     if(audio.buffered && audio.buffered.length){ const end=audio.buffered.end(audio.buffered.length-1); loadedEl.style.width=`${(d?end/d:0)*100}%`; }
-    /* mobile mirrors */
-    playedEl_m.style.width = playedEl.style.width;
-    loadedEl_m.style.width = loadedEl.style.width;
-    mpState.textContent = audio.paused ? '[paused]' : '[playing]';
+    mstate.textContent = audio.paused ? '[paused]' : '[playing]';
+    mplay.textContent = audio.paused ? '[▶︎]' : '[‖]';
     rafId = requestAnimationFrame(uiUpdate);
   }
   function loadTrackByIndex(i){
     currentIndex = (i+TRACKS.length)%TRACKS.length;
     audio.src = TRACKS[currentIndex].src;
-    nowPlaying.textContent = `> [${TRACKS[currentIndex].title}]`;
-    mpSong.textContent = TRACKS[currentIndex].title;
+    const t = cleanTitle(TRACKS[currentIndex].title);
+    nowPlaying.textContent = `> [${t}]`;
+    mtitle.textContent = t;
   }
   function nextTrack(){ loadTrackByIndex(currentIndex+1); audio.play().catch(()=>{}); }
   function prevTrack(){ loadTrackByIndex(currentIndex-1); audio.play().catch(()=>{}); }
 
-  audio.addEventListener('play', ()=>{ cancelAnimationFrame(rafId); playToggle.textContent='[pause]'; playToggle_m.textContent='[pause]'; uiUpdate(); });
-  audio.addEventListener('pause', ()=>{ cancelAnimationFrame(rafId); playToggle.textContent='[play]'; playToggle_m.textContent='[play]'; });
+  audio.addEventListener('play', ()=>{ cancelAnimationFrame(rafId); playToggle.textContent='[‖]'; uiUpdate(); });
+  audio.addEventListener('pause', ()=>{ cancelAnimationFrame(rafId); playToggle.textContent='[▶︎]'; });
   audio.addEventListener('loadedmetadata', ()=> uiUpdate());
   audio.addEventListener('ended', nextTrack);
 
@@ -520,25 +542,19 @@
     if(act==='play'){ audio.paused ? audio.play() : audio.pause(); }
     else if(act==='next'){ nextTrack(); }
     else if(act==='prev'){ prevTrack(); }
-    else if(act==='mute'){ audio.muted=!audio.muted; pmute.textContent = audio.muted ? '[unmute]' : '[mute]'; pmute_m.textContent = pmute.textContent; }
+    else if(act==='mute'){ audio.muted=!audio.muted; pmute.textContent = audio.muted ? '[unmute]' : '[mute]'; }
     else if(act==='vol-'){ audio.volume=Math.max(0, +(audio.volume-0.1).toFixed(1)); }
     else if(act==='vol+'){ audio.volume=Math.min(1, +(audio.volume+0.1).toFixed(1)); }
   }
   pcontrols.addEventListener('click', e=>{ const a=e.target.closest('.pctrl'); if(a) handlePlayerAction(a.dataset.act); });
   pcontrols.addEventListener('keydown', e=>{ const a=e.target.closest('.pctrl'); if(a && (e.key==='Enter'||e.key===' ')){ e.preventDefault(); handlePlayerAction(a.dataset.act); }});
-  pcontrols_m.addEventListener('click', e=>{ const a=e.target.closest('.pctrl'); if(a) handlePlayerAction(a.dataset.act); });
 
-  function seekAt(bar, e){
-    const rect = bar.getBoundingClientRect();
-    const x = Math.min(Math.max(0,e.clientX-rect.left),rect.width);
-    const ratio = x/rect.width;
-    audio.currentTime = (audio.duration||0)*ratio;
-    if(audioCtx) clickSfx(0.25,800,0.02);
-  }
-  let seeking=false; seekBar.addEventListener('pointerdown',e=>{ seeking=true; seekAt(seekBar,e); seekBar.setPointerCapture(e.pointerId); });
-  seekBar.addEventListener('pointermove',e=>{ if(seeking) seekAt(seekBar,e) }); seekBar.addEventListener('pointerup',()=> seeking=false);
-  let seekingm=false; seekBar_m.addEventListener('pointerdown',e=>{ seekingm=true; seekAt(seekBar_m,e); seekBar_m.setPointerCapture(e.pointerId); });
-  seekBar_m.addEventListener('pointermove',e=>{ if(seekingm) seekAt(seekBar_m,e) }); seekBar_m.addEventListener('pointerup',()=> seekingm=false);
+  mplay.addEventListener('click', ()=> handlePlayerAction('play'));
+  mnext.addEventListener('click', ()=> handlePlayerAction('next'));
+  mhide.addEventListener('click', ()=>{
+    mbar.style.display='none';
+    document.getElementById('xp-root').classList.remove('player-open');
+  });
 
   /* ===== TERMINAL ===== */
   const win=document.getElementById('xp-root'), tBar=document.getElementById('tbar');
@@ -546,27 +562,37 @@
   const out=document.getElementById('terminal-output'), cli=document.getElementById('cli-input');
   const mainview=document.getElementById('mainview'), pane=document.getElementById('pane'), paneTitle=document.getElementById('paneTitle'), paneTerm=document.getElementById('paneTerm');
 
-  function applyDragBindings(){
+  function applyBindings(){
     if (isMobile()){
-      // “zakotwicz” okno na mobilu, bez drag
-      win.style.left = '0';
-      win.style.right = '0';
-      win.style.transform = 'none';
+      // brak drag na mobile
     } else {
-      dragWindow(pRoot, pBar, 9);
+      dragWindow(pRoot, document.getElementById('pbar'), 9);
       dragWindow(win, tBar, 58);
     }
   }
-  applyDragBindings();
-  window.addEventListener('resize', applyDragBindings);
+  applyBindings();
+  window.addEventListener('resize', applyBindings);
 
-  /* Terminal treści i pane */
   const lines={
     beats:["> opening player...", "> loading tracks...", "> done_"],
     store:["> opening BeatStars portal...", "> please wait.", "> connected ✅", "> done_"],
     info:["> whoami: producer from Poland", "> sound: melodic plug + digital emotion", "> links: instagram / soundcloud / mail", "> done_"],
     access:["> protected area", "> coming soon...", "> done_"]
   };
+
+  /* Typowanie pojedynczej linii do LOGÓW (z tym samym „stukaniem”) */
+  function typeWriteLineToLogs(text, speed=14){
+    return new Promise(resolve=>{
+      const line=document.createElement('div'); out.appendChild(line);
+      let i=0, step=0;
+      const iv=setInterval(()=>{
+        line.textContent=text.slice(0,++i);
+        if(audioCtx && (++step%3===0)) typeTick();
+        if(i>=text.length){ clearInterval(iv); resolve(); }
+        out.scrollTop=out.scrollHeight;
+      }, speed);
+    });
+  }
 
   function typeLines(arr){
     out.textContent=""; let i=0;
@@ -600,9 +626,15 @@
     }
   }
 
+  /* [back] jako .titem z hoverem */
   function attachBack(){
     const node=[...paneTerm.querySelectorAll('.tline')].find(n=>/\[back\]/i.test(n.textContent));
-    if(node){ node.innerHTML=node.textContent.replace(/\[back\]/i,'<span class="titem" data-back>[back]</span>'); paneTerm.querySelector('[data-back]').addEventListener('click', ()=> closePane()); }
+    if(node){
+      node.innerHTML=node.textContent.replace(/\[back\]/i,'<span class="titem" data-back>[back]</span>');
+      const b = paneTerm.querySelector('[data-back]');
+      b.addEventListener('click', ()=> closePane());
+      b.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' ') { e.preventDefault(); closePane(); }});
+    }
   }
 
   function renderInfo(){
@@ -639,40 +671,47 @@
       attachBack(); return;
     }
 
-    if(section==='store'){
-      await typePaneLines([`> opening BeatStars portal...`,`> please wait.`], 12, 100);
-      setTimeout(async ()=>{
-        await typePaneLines([`> connected ✅`,`done_`],12,80);
-        window.open(BEATSTARS_URL, '_blank', 'noopener,noreferrer');
-      }, 1500);
-      return;
-    }
-
     if(section==='beats'){
-      await typePaneLines([`> [back]`,`> player loaded`,`> use [play] to start`,`done_`]);
-      attachBack();
-      return;
+      await typePaneLines([`> [back]`,`> player loaded`,`> use [▶︎] to start`,`done_`]);
+      attachBack(); return;
     }
   }
 
   function openPane(key){ paneTitle.textContent=`/${key}`; mainview.classList.add('hidden'); pane.classList.remove('hidden'); requestAnimationFrame(()=> pane.classList.add('show')); renderPane(key); }
   function closePane(){ pane.classList.remove('show'); setTimeout(()=>{ pane.classList.add('hidden'); mainview.classList.remove('hidden'); },160); }
 
-  /* ===== HUB / CLI ===== */
+  function showPlayerDesktop(){
+    pRoot.style.display='block';
+    if (pRoot.center) pRoot.center();
+    document.getElementById('dock-player')?.classList.add('active');
+  }
+  function showPlayerMobile(){
+    const mbar = document.getElementById('mobile-player');
+    mbar.style.display='flex';
+    document.getElementById('xp-root').classList.add('player-open');
+  }
+
+  /* STORE: teraz typowane jak „beats” + pauza 1.5s przed open() */
+  async function runStoreFlowInLogs(){
+    out.textContent = "";
+    await typeWriteLineToLogs("> opening BeatStars portal...", 14);
+    await sleep(300);
+    await typeWriteLineToLogs("> please wait.", 14);
+    await sleep(1500);
+    await typeWriteLineToLogs("> connected ✅", 14);
+    await sleep(300);
+    window.open(BEATSTARS_URL, "_blank", "noopener,noreferrer");
+    await typeWriteLineToLogs("> opening portal in new tab...", 14);
+    await typeWriteLineToLogs("> done_", 14);
+  }
+
   function handleHubAction(section){
     if(section==='beats'){
-      // przygotuj player
       loadTrackByIndex(0);
-      if(isMobile()){
-        // pokaż mobilny pasek
-        document.getElementById('xp-root').classList.add('mplayer-open');
-        mpWrap.style.display='block';
-      }else{
-        if(pRoot.style.display==='none'){ pRoot.style.display='block'; if(pRoot.center) pRoot.center(); }
-      }
+      if(isMobile()) showPlayerMobile();
+      else showPlayerDesktop();
     } else if(section==='store'){
-      // sekcja store: komunikaty + redirect w renderPane
-      openPane('store');
+      runStoreFlowInLogs();
     } else if(section==='info' || section==='access'){
       openPane(section);
     }
@@ -682,7 +721,7 @@
     el.tabIndex=0;
     el.addEventListener('click', ()=>{
       const key=el.dataset.section; if(audioCtx) uiClick();
-      typeLines(lines[key]||["> done_"]);
+      if(key!=='store') typeLines(lines[key]||["> done_"]); // store ma dedykowany przepływ
       handleHubAction(key);
     });
     el.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' ') el.click(); });
@@ -695,7 +734,7 @@
     switch((cmd||'').toLowerCase()){
       case 'help': appendLine("> commands: beats | store | info | access | clear | open <info|access>"); break;
       case 'beats': typeLines(lines.beats); handleHubAction('beats'); break;
-      case 'store': typeLines(lines.store); openPane('store'); break;
+      case 'store': runStoreFlowInLogs(); break;
       case 'info':  typeLines(lines.info);  openPane('info'); break;
       case 'access':typeLines(lines.access);openPane('access'); break;
       case 'clear': out.textContent=""; break;
@@ -717,7 +756,7 @@
   function restoreFixed(which){
     if(audioCtx) uiClick();
     if(which==='terminal'){ win.style.display='block'; if(win.center) win.center(); dockTerm.classList.add('active'); }
-    else { pRoot.style.display='block'; if(pRoot.center) pRoot.center(); dockPlayer.classList.add('active'); }
+    else { showPlayerDesktop(); }
   }
 
   document.getElementById('min').addEventListener('click', ()=> minimizeFixed('terminal'));
@@ -769,11 +808,10 @@
         setTimeout(()=>{
           boot.style.display='none';
           document.getElementById('xp-root').style.display='block';
-          if(!isMobile()){  // dock tylko na desktopie
-            dock.style.opacity='1'; dock.style.transform='translateY(0)';
-          }
+          if(!isMobile()){ dock.style.opacity='1'; dock.style.transform='translateY(0)'; }
           if (!isMobile() && win.center) win.center();
-          loadTrackByIndex(0);   // pierwszy track załadowany bez autoplay
+          loadTrackByIndex(0);   // bez autoplay
+          typeLines(["> Welcome to SevvynOS", "> type 'beats' to open BeatStars"]);
           if(audioCtx) bootChime();
         }, 280);
       }
