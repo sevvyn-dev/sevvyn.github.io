@@ -58,7 +58,21 @@
     cursor:grab
   }
   .xptitle{ display:flex; align-items:center; gap:8px; font-weight:700; letter-spacing:.2px; text-shadow:0 1px 0 rgba(0,0,0,.35) }
+
+  /* DIODA STATUSU (kolory sterowane klasami) */
   .xptitle .dot{ width:10px; height:10px; border-radius:50%; background: radial-gradient(circle at 30% 30%, #fff, #6AB3FF 40%, #1A5CE0 70%); box-shadow:0 0 6px rgba(106,179,255,.9) }
+  .xptitle .dot.green{
+    background: radial-gradient(circle at 30% 30%, #fff, #7affc2 40%, #11c46a 70%);
+    box-shadow:0 0 8px rgba(0,255,136,.9), 0 0 3px rgba(0,255,136,.6);
+  }
+  .xptitle .dot.orange{
+    background: radial-gradient(circle at 30% 30%, #fff, #ffd27a 40%, #c48711 70%);
+    box-shadow:0 0 8px rgba(255,173,51,.9), 0 0 3px rgba(255,173,51,.6);
+  }
+  .xptitle .dot.red{
+    background: radial-gradient(circle at 30% 30%, #fff, #ff9aa1 40%, #c4112a 70%);
+    box-shadow:0 0 8px rgba(255,51,102,.9), 0 0 3px rgba(255,51,102,.6);
+  }
 
   .xpbtns{ display:flex; gap:6px }
   .xpbtns button{
@@ -149,7 +163,6 @@
   .cursor{ display:inline-block; width:9px; background:var(--lime); animation:blink .9s step-end infinite }
   @keyframes blink{ 50%{opacity:0} }
 
-  /* Pane + hover na .titem (również [back]) */
   .tline{ white-space:pre-wrap }
   .titem{ display:inline; color:var(--lime); cursor:pointer; padding:2px 2px; border-radius:4px; transition:color .12s, text-shadow .12s, background-color .12s }
   .titem:hover, .titem:focus{ outline:0; color:#ff6fb3; text-shadow:0 0 8px rgba(255,111,179,.35); background:rgba(255,111,179,.08) }
@@ -218,6 +231,9 @@
            rgba(255,255,255,.08);
          border:1px solid rgba(0,0,0,.45); border-radius:8px; font-family:"VT323",monospace; image-rendering: pixelated }
 
+  /* ===== GLOBAL: mobilny pasek domyślnie ukryty ===== */
+  .mobile-sticky{ display:none; }
+
   /* ===== MOBILE LAYOUT (<=900px) ===== */
   @media (max-width: 900px){
     :root{ --mobilePad:clamp(8px,4vw,14px); --headH:44px; --mbarH:44px; }
@@ -234,19 +250,21 @@
       border-bottom:1px solid rgba(0,0,0,.5);
       color:#e8fff5;
       padding:6px var(--mobilePad);
-      display:none;
       align-items:center; gap:12px;
       white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
       z-index:1000;
+      box-shadow:0 8px 16px rgba(0,0,0,.35);
     }
-    body.player-open .mobile-sticky{ display:flex; }
+    body.player-open .mobile-sticky{ display:flex !important; }
 
-    /* Terminal okno pod sticky */
+    .mobile-sticky .mini-title{ color:#f2fff8; opacity:.95; }
+    .mobile-sticky #mstate{ color:#dfeff0; opacity:.55; }
+
     .xpwin{
       position:fixed;
       top:calc(10svh + env(safe-area-inset-top));
       left:0; right:0; margin:0 auto;
-      width:95vw; max-width:95vw;              /* 5% tapety po bokach */
+      width:95vw; max-width:95vw;              /* ~5% tapety po bokach */
       height:calc(80svh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
       min-width:0 !important;
       min-height:0 !important;
@@ -275,7 +293,7 @@
       justify-content:space-between;
     }
 
-    /* Na telefonie przyciski X,_ pełny kolor, ale nieaktywne */
+    /* Na telefonie przyciski X,_ pełny kolor, ale bez akcji */
     .xpbtns button{ pointer-events:none; opacity:1; cursor:not-allowed; }
 
     .xpbody{
@@ -326,11 +344,11 @@
 </div>
 
 <!-- ===== STICKY MOBILE PLAYER BAR ===== -->
-<div class="mobile-sticky" id="mobile-player">
+<div class="mobile-sticky" id="mobile-player" aria-hidden="true">
   <span id="mplay" class="mini-btn">[▶︎]</span>
   <span id="mnext" class="mini-btn">[next]</span>
   <span class="mini-title" id="mtitle" style="overflow:hidden;text-overflow:ellipsis;">[player]</span>
-  <span id="mstate" style="opacity:.85"></span>
+  <span id="mstate" style="margin-left:6px;"></span>
   <span id="mhide" class="mini-btn" style="margin-left:auto">[hide]</span>
 </div>
 
@@ -368,7 +386,7 @@
 <!-- ===== TERMINAL ===== -->
 <div class="xpwin" id="xp-root">
   <div class="xpbar" id="tbar">
-    <div class="xptitle"><span class="dot"></span>sevvyn_terminal.exe</div>
+    <div class="xptitle"><span class="dot red" id="statusDot"></span>sevvyn_terminal.exe</div>
     <div class="xpbtns">
       <button id="min" title="Minimize">_</button>
       <button id="max" title="Maximize">□</button>
@@ -517,6 +535,20 @@
   const mstate = document.getElementById('mstate');
   const mhide = document.getElementById('mhide');
 
+  /* DIODA statusu */
+  const statusDot = document.getElementById('statusDot');
+  function setStatusDot(){
+    if(!statusDot) return;
+    statusDot.classList.remove('green','orange','red');
+    if (audio.src && !audio.paused) {
+      statusDot.classList.add('green');         // gra
+    } else if (audio.currentTime > 0 && audio.paused) {
+      statusDot.classList.add('orange');        // pauza
+    } else {
+      statusDot.classList.add('red');           // stop / nic nie zagrano
+    }
+  }
+
   function fmt(t){ if(!isFinite(t)) return "00:00"; const m=Math.floor(t/60), s=Math.floor(t%60); return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`; }
   const cleanTitle = t => t.split(' —')[0].split(' -')[0];
   let rafId=null, currentIndex=0;
@@ -528,6 +560,7 @@
     if(audio.buffered && audio.buffered.length){ const end=audio.buffered.end(audio.buffered.length-1); loadedEl.style.width=`${(d?end/d:0)*100}%`; }
     mstate.textContent = audio.paused ? '[paused]' : '[playing]';
     mplay.textContent = audio.paused ? '[▶︎]' : '[‖]';
+    setStatusDot();
     rafId = requestAnimationFrame(uiUpdate);
   }
   function loadTrackByIndex(i){
@@ -536,32 +569,15 @@
     const t = cleanTitle(TRACKS[currentIndex].title);
     nowPlaying.textContent = `> [${t}]`;
     mtitle.textContent = t;
+    setStatusDot();
   }
   function nextTrack(){ loadTrackByIndex(currentIndex+1); audio.play().catch(()=>{}); }
   function prevTrack(){ loadTrackByIndex(currentIndex-1); audio.play().catch(()=>{}); }
 
-  audio.addEventListener('play', ()=>{ cancelAnimationFrame(rafId); playToggle.textContent='[‖]'; uiUpdate(); });
-  audio.addEventListener('pause', ()=>{ cancelAnimationFrame(rafId); playToggle.textContent='[▶︎]'; });
-  audio.addEventListener('loadedmetadata', ()=> uiUpdate());
-  audio.addEventListener('ended', nextTrack);
-
-  function handlePlayerAction(act){
-    if(audioCtx) uiClick();
-    if(act==='play'){ audio.paused ? audio.play() : audio.pause(); }
-    else if(act==='next'){ nextTrack(); }
-    else if(act==='prev'){ prevTrack(); }
-    else if(act==='mute'){ audio.muted=!audio.muted; pmute.textContent = audio.muted ? '[unmute]' : '[mute]'; }
-    else if(act==='vol-'){ audio.volume=Math.max(0, +(audio.volume-0.1).toFixed(1)); }
-    else if(act==='vol+'){ audio.volume=Math.min(1, +(audio.volume+0.1).toFixed(1)); }
-  }
-  pcontrols.addEventListener('click', e=>{ const a=e.target.closest('.pctrl'); if(a) handlePlayerAction(a.dataset.act); });
-  pcontrols.addEventListener('keydown', e=>{ const a=e.target.closest('.pctrl'); if(a && (e.key==='Enter'||e.key===' ')){ e.preventDefault(); handlePlayerAction(a.dataset.act); }});
-
-  mplay.addEventListener('click', ()=> handlePlayerAction('play'));
-  mnext.addEventListener('click', ()=> handlePlayerAction('next'));
-  mhide.addEventListener('click', ()=>{
-    document.body.classList.remove('player-open');
-  });
+  audio.addEventListener('play', ()=>{ cancelAnimationFrame(rafId); playToggle.textContent='[‖]'; setStatusDot(); uiUpdate(); });
+  audio.addEventListener('pause', ()=>{ cancelAnimationFrame(rafId); playToggle.textContent='[▶︎]'; setStatusDot(); });
+  audio.addEventListener('loadedmetadata', ()=> { setStatusDot(); uiUpdate(); });
+  audio.addEventListener('ended', ()=>{ /* auto-next już ustawia play -> zielone */ nextTrack(); });
 
   /* ===== TERMINAL ===== */
   const win=document.getElementById('xp-root'), tBar=document.getElementById('tbar');
@@ -631,7 +647,6 @@
     }
   }
 
-  /* [back] jako .titem z hoverem */
   function attachBack(){
     const node=[...paneTerm.querySelectorAll('.tline')].find(n=>/\[back\]/i.test(n.textContent));
     if(node){
@@ -694,9 +709,6 @@
     document.body.classList.add('player-open');
   }
 
-  /* STORE: typowanie + pauza 1.5s, a potem:
-     - MOBILE: przekierowanie w TEJ SAMEJ karcie (location.href)
-     - DESKTOP: nowa karta (window.open) */
   async function runStoreFlowInLogs(){
     out.textContent = "";
     await typeWriteLineToLogs("> opening BeatStars portal...", 14);
@@ -708,9 +720,9 @@
 
     if (isMobile()){
       await typeWriteLineToLogs("> switching to BeatStars...", 14);
-      location.href = BEATSTARS_URL;           // ta sama karta na telefonie
+      location.href = "https://www.beatstars.com/sevvyn_";
     } else {
-      window.open(BEATSTARS_URL, "_blank", "noopener,noreferrer"); // desktop: nowa karta
+      window.open("https://www.beatstars.com/sevvyn_", "_blank", "noopener,noreferrer");
       await typeWriteLineToLogs("> opening portal in new tab...", 14);
       await typeWriteLineToLogs("> done_", 14);
     }
@@ -719,6 +731,7 @@
   function handleHubAction(section){
     if(section==='beats'){
       loadTrackByIndex(0);
+      setStatusDot();
       if(isMobile()) showPlayerMobile();
       else showPlayerDesktop();
     } else if(section==='store'){
@@ -732,7 +745,7 @@
     el.tabIndex=0;
     el.addEventListener('click', ()=>{
       const key=el.dataset.section; if(audioCtx) uiClick();
-      if(key!=='store') typeLines(lines[key]||["> done_"]); // store ma dedykowany przepływ
+      if(key!=='store') typeLines(lines[key]||["> done_"]);
       handleHubAction(key);
     });
     el.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' ') el.click(); });
@@ -754,6 +767,34 @@
     }
   }
   document.getElementById('cli-input').addEventListener('keydown', e=>{ if(e.key==='Enter'){ runCommand(e.target.value); e.target.value=""; } });
+
+  async function logInitPlayback(){
+    await typeWriteLineToLogs("> initializing playback...", 14);
+    const t = (document.getElementById('nowPlaying').textContent.match(/\[(.*)\]/)||[])[1] || "track";
+    await typeWriteLineToLogs(`> ${t} started_`, 14);
+  }
+
+  function handlePlayerAction(act){
+    if(audioCtx) uiClick();
+    if(act==='play'){
+      if(audio.paused){
+        audio.play().then(()=>{ setStatusDot(); logInitPlayback(); }).catch(()=>{});
+      }else{
+        audio.pause();
+        setStatusDot();
+      }
+    }
+    else if(act==='next'){ nextTrack(); setStatusDot(); }
+    else if(act==='prev'){ prevTrack(); setStatusDot(); }
+    else if(act==='mute'){ audio.muted=!audio.muted; pmute.textContent = audio.muted ? '[unmute]' : '[mute]'; }
+    else if(act==='vol-'){ audio.volume=Math.max(0, +(audio.volume-0.1).toFixed(1)); }
+    else if(act==='vol+'){ audio.volume=Math.min(1, +(audio.volume+0.1).toFixed(1)); }
+  }
+  document.getElementById('pcontrols').addEventListener('click', e=>{ const a=e.target.closest('.pctrl'); if(a) handlePlayerAction(a.dataset.act); });
+  document.getElementById('pcontrols').addEventListener('keydown', e=>{ const a=e.target.closest('.pctrl'); if(a && (e.key==='Enter'||e.key===' ')){ e.preventDefault(); handlePlayerAction(a.dataset.act); }});
+  mplay.addEventListener('click', ()=> handlePlayerAction('play'));
+  mnext.addEventListener('click', ()=> handlePlayerAction('next'));
+  mhide.addEventListener('click', ()=>{ document.body.classList.remove('player-open'); });
 
   /* ===== Dock sterowanie (desktop) ===== */
   const dock=document.getElementById('dock');
@@ -822,6 +863,7 @@
           if(!isMobile()){ dock.style.opacity='1'; dock.style.transform='translateY(0)'; }
           if (!isMobile() && win.center) win.center();
           loadTrackByIndex(0);   // bez autoplay
+          setStatusDot();        // start: czerwony
           typeLines(["> Welcome to SevvynOS", "> type 'beats' to open BeatStars"]);
           if(audioCtx) bootChime();
         }, 280);
@@ -829,6 +871,11 @@
     }, 90);
   }
   boot();
+
+  /* Seek bar handlers */
+  function seekAt(e){ const r=seekBar.getBoundingClientRect(); const x=Math.min(Math.max(0,e.clientX-r.left),r.width); audio.currentTime=(audio.duration||0)*(x/r.width); if(audioCtx) clickSfx(0.25,800,0.02); setStatusDot(); }
+  let seeking=false; seekBar.addEventListener('pointerdown',e=>{ seeking=true; seekAt(e); seekBar.setPointerCapture(e.pointerId); });
+  seekBar.addEventListener('pointermove',e=>{ if(seeking) seekAt(e) }); seekBar.addEventListener('pointerup',()=> seeking=false);
 </script>
 </body>
 </html>
