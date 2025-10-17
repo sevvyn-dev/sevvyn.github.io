@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>sevvyn_xp</title>
 <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+<link rel="preload" href="/tapeta.png" as="image" />
 <style>
   :root{
     --lime:#00FF88;
@@ -19,7 +20,7 @@
     --start-bot:#1d8f33;
   }
 
-  /* TAPETA: IMG + overlay (działa w IG in-app) */
+  /* TAPETA: IMG + overlay (działa też w webviewach) */
   html,body{ height:100%; margin:0 }
   body{
     font-family:"VT323", ui-monospace, Menlo, Consolas, monospace;
@@ -243,7 +244,7 @@
       top:env(safe-area-inset-top);
       left:0; right:0;
       height:var(--mbarH);
-      background:linear-gradient(#2F69F4, #1F52D6 60%, #1842B0); /* ciemniejszy niż pasek okna */
+      background:linear-gradient(#2F69F4, #1F52D6 60%, #1842B0);
       border-bottom:1px solid rgba(0,0,0,.5);
       color:#e8fff5;
       padding:6px var(--mobilePad);
@@ -304,10 +305,9 @@
 </head>
 <body>
 
-<!-- TAPETA IMG -->
+<!-- TAPETA IMG z PUBLIC -->
 <div class="wallpaper" aria-hidden="true">
-  <img src="https://dl.dropboxusercontent.com/scl/fi/r60fnewmpi6oh4oqzvhik/tapeta.png?rlkey=g7qzaiy3x53phk960jf8niwmu&st=c37hnbz2"
-       alt="" fetchpriority="high" decoding="async" referrerpolicy="no-referrer">
+  <img src="/tapeta.png" alt="" fetchpriority="high" decoding="async">
 </div>
 
 <!-- ===== BOOT ===== -->
