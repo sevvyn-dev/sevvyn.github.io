@@ -4,8 +4,13 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>sevvyn_xp</title>
+
 <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
-<link rel="preload" href="/tapeta.png" as="image" />
+
+<!-- ważne: plik w public/ jest serwowany jako /tapeta.png -->
+<link rel="preload" href="/tapeta.png" as="image" imagesrcset="/tapeta.png 1x" />
+<meta name="referrer" content="no-referrer" />
+
 <style>
   :root{
     --lime:#00FF88;
@@ -213,7 +218,6 @@
     font-family:"VT323",monospace;
     image-rendering: pixelated;
     transition: filter .12s, transform .05s, background .12s;
-    filter: contrast(1.15) saturate(0.95);
   }
   .dockbtn:hover{ filter: contrast(1.2) saturate(1) brightness(1.05) }
   .dockbtn:active{ transform: translateY(1px) }
