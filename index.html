@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pl">
 <head>
@@ -7,9 +8,8 @@
 
 <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
 
-<!-- ważne: plik w public/ jest serwowany jako /tapeta.png -->
-<link rel="preload" href="/tapeta.png" as="image" imagesrcset="/tapeta.png 1x" />
-<meta name="referrer" content="no-referrer" />
+<!-- PRELOAD tapety z /public -->
+<link rel="preload" href="/public/tapeta.png?v=1" as="image" />
 
 <style>
   :root{
@@ -309,9 +309,9 @@
 </head>
 <body>
 
-<!-- TAPETA IMG z PUBLIC -->
+<!-- TAPETA IMG z /public -->
 <div class="wallpaper" aria-hidden="true">
-  <img src="/tapeta.png" alt="" fetchpriority="high" decoding="async">
+  <img src="/public/tapeta.png?v=1" alt="" fetchpriority="high" decoding="async">
 </div>
 
 <!-- ===== BOOT ===== -->
