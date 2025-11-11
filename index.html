@@ -322,50 +322,19 @@
   }
 
 
-/* === Time/Season Reactive Themes === */
-:root[data-theme="morning"]{
-  --blue:#3b7cf5;
-  --blue-d:#234fc6;
-  --pink:#ff6fa8;
-}
-:root[data-theme="evening"]{
-  --blue:#2f62e4;
-  --blue-d:#1d3f9e;
-  --pink:#ff4f9a;
-}
-:root[data-theme="night"]{
-  --blue:#243a84;
-  --blue-d:#16244f;
-  --pink:#b88cff;
-  --lime:#7af7d1;
-}
-/* wallpaper tints */
-:root[data-theme="morning"] .wallpaper::after{
-  background:linear-gradient(180deg, rgba(255,166,122,.18), rgba(0,0,0,.38));
-}
-:root[data-theme="evening"] .wallpaper::after{
-  background:linear-gradient(180deg, rgba(255,105,180,.12), rgba(0,0,0,.42));
-}
-:root[data-theme="night"] .wallpaper::after{
-  background:linear-gradient(180deg, rgba(0,0,0,.35), rgba(10,10,26,.55));
-}
-/* subtle stars at night */
-:root[data-theme="night"] .wallpaper::before{
+body::before{
   content:"";
-  position:absolute; inset:0; pointer-events:none;
-  background-image:
-    radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,.18) 0 1px, transparent 1px),
-    radial-gradient(1px 1px at 40% 80%, rgba(255,255,255,.12) 0 1px, transparent 1px),
-    radial-gradient(1px 1px at 70% 30%, rgba(255,255,255,.16) 0 1px, transparent 1px),
-    radial-gradient(1px 1px at 90% 60%, rgba(255,255,255,.10) 0 1px, transparent 1px);
-  opacity:.35;
+  position:fixed; inset:0; pointer-events:none;
+  background:repeating-linear-gradient(0deg, rgba(255,255,255,0.015) 0 1px, rgba(0,0,0,0.015) 1px 2px);
+  mix-blend-mode:overlay;
+  opacity:.06;
 }
-
-/* seasons: ultra subtle palette shifts */
-:root[data-season="winter"] body{ filter: saturate(0.95) hue-rotate(-6deg); }
-:root[data-season="summer"] body{ filter: saturate(1.05) hue-rotate(4deg); }
-:root[data-season="spring"] body{ filter: saturate(1.03); }
-:root[data-season="autumn"] body{ filter: saturate(0.98) hue-rotate(-2deg); }
+body::after{
+  content:"";
+  position:fixed; inset:0; pointer-events:none;
+  background:repeating-linear-gradient(180deg, rgba(0,0,0,0.08) 0 3px, transparent 3px 6px);
+  opacity:.07;
+}
 
 </style>
 </head>
@@ -521,32 +490,6 @@
   ];
   const BEATSTARS_URL = "https://www.beatstars.com/sevvyn_";
   const isMobile = () => window.matchMedia("(max-width: 900px)").matches;
-
-  /* === Time/Season Reactive Theme === */
-  function setThemeByTime(){
-    const h = new Date().getHours();
-    let theme = 'day';
-    if (h >= 22 || h < 6) theme = 'night';
-    else if (h < 11) theme = 'morning';
-    else if (h < 18) theme = 'day';
-    else theme = 'evening';
-    document.documentElement.setAttribute('data-theme', theme);
-    return theme;
-  }
-  function setSeason(){
-    const m = new Date().getMonth()+1;
-    let s = 'winter';
-    if (m>=3 && m<=5) s='spring';
-    else if (m>=6 && m<=8) s='summer';
-    else if (m>=9 && m<=11) s='autumn';
-    document.documentElement.setAttribute('data-season', s);
-    return s;
-  }
-  function describeEnv(theme, season){
-    const map = {morning:'morning', day:'day', evening:'evening', night:'nightmode'};
-    return `env: ${map[theme]||theme} / ${season}`;
-  }
-
 
   /* WebAudio SFX */
   let audioCtx=null, comp, master;
@@ -987,7 +930,7 @@
           if (!isMobile() && win.center) win.center();
           loadTrackByIndex(0);
           setStatusDot();
-          typeLines(["> Welcome to SevvynOS", "> type 'store' to open BeatStars", "> type 'private' to view collaborator packs"]);
+          typeLines(["> Welcome to SevvynOS", "> type 'beats' to listen", "> type 'store' to open BeatStars", "> type 'private' to view collaborator packs"]);
           if(audioCtx) bootChime();
         }, 280);
       }
