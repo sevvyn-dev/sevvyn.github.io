@@ -307,6 +307,20 @@
     .out{ flex:1 1 auto; min-height:0; overflow:auto; }
     .playerwin{ display:none !important; }
   }
+
+  /* ===== GLOW WARM PINK (command: glow) ===== */
+  :root.glow-warm .xpwin,
+  :root.glow-warm .playerwin,
+  :root.glow-warm .dock{
+    box-shadow:0 0 0 1px rgba(255,105,180,.22) inset,
+               0 0 24px rgba(255,105,180,.18),
+               0 0 64px rgba(255,105,180,.12);
+    border-color: rgba(255,105,180,.28);
+  }
+  :root.glow-warm .xptitle .dot{
+    box-shadow:0 0 10px rgba(255,105,180,.85), 0 0 4px rgba(255,105,180,.6);
+  }
+
 </style>
 </head>
 <body>
@@ -577,7 +591,7 @@
     beats:["> opening player...", "> loading tracks...", "> done_"],
     store:["> opening BeatStars portal...", "> please wait.", "> connected ✅", "> done_"],
     info:["> whoami: producer from Poland", "> sound: melodic plug + digital emotion", "> links: instagram / soundcloud / mail", "> done_"],
-    access:["> protected area", "> coming soon...", "> done_"]
+    access:["> [back]", "> unlocks drop on instagram", "> follow: instagram.com/sevvyn", "> codes appear in stories/highlights", "> enter codes here: access <code>", "> done_"]
   };
 
   function typeWriteLineToLogs(text, speed=14){
@@ -665,12 +679,45 @@
     }
 
     if(section==='access'){
-      await typePaneLines([`> [back]`,`> restricted module`,`> [coming soon]`,`done_`]);
-      attachBack(); return;
+      await typePaneLines([
+        `> [back]`,
+        `> unlocks drop on instagram`,
+        `> follow: instagram.com/sevvyn`,
+        `> codes appear in stories/highlights`,
+        `> enter codes here: access <code>`,
+        `> done_`
+      ]);
+      attachBack();
+      // linkify instagram inside the access pane
+      [...paneTerm.querySelectorAll('.tline')].forEach(n=>{
+        const t=n.textContent.toLowerCase();
+        if(t.includes('instagram.com/sevvyn')) n.innerHTML=`> <a class="titem" href="https://instagram.com/sevvyn" target="_blank" rel="noopener">[instagram.com/sevvyn]</a>`;
+      });
+      return;
     }
 
     if(section==='beats'){
       await typePaneLines([`> [back]`,`> player loaded`,`> use [▶︎] to start`,`done_`]);
+      attachBack(); return;
+    }
+    if(section==='private'){
+      await typePaneLines([
+        `> [back]`,
+        `> private packs are available only for collaborators`,
+        `>`,
+        `> if you're actually BUILDING something:`,
+        `> reach out:`,
+        `>`,
+        `> email → book@sevvyn.studio`,
+        `> instagram dm → instagram.com/sevvyn`,
+        `>`,
+        `> subject: "v7 access"`,
+        `> include:`,
+        `> - your IG`,
+        `> - latest work / vibe reference`,
+        `> - what you're aiming for`,
+        `done_`
+      ]);
       attachBack(); return;
     }
   }
@@ -723,7 +770,7 @@
     el.tabIndex=0;
     el.addEventListener('click', ()=>{
       const key=el.dataset.section; if(audioCtx) uiClick();
-      if(key!=='store') typeLines(lines[key]||["> done_"]);
+      if(key!=='store' && key!=='access') typeLines(lines[key]||["> done_"]);
       handleHubAction(key);
     });
     el.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' ') el.click(); });
@@ -734,13 +781,42 @@
     const txt=raw.trim(); if(!txt) return; appendLine("> "+txt); if(audioCtx) uiClick();
     const [cmd,arg]=txt.split(/\s+/);
     switch((cmd||'').toLowerCase()){
-      case 'help': appendLine("> commands: beats | store | info | access | clear | open <info|access>"); break;
+      case 'help': appendLine("> commands: beats | store | info | access <code> | private | glow | clear | open <info|access|private>"); break;
       case 'beats': typeLines(lines.beats); handleHubAction('beats'); break;
       case 'store': runStoreFlowInLogs(); break;
       case 'info':  typeLines(lines.info);  openPane('info'); break;
-      case 'access':typeLines(lines.access);openPane('access'); break;
+      case 'access':
+        if(arg){
+          const code = String(arg).toLowerCase();
+          if(code==='beyourself'){
+            const promo='SEVVYN10';
+            appendLine('> code accepted.');
+            appendLine('> BeatStars discount code:');
+            appendLine('> ------------------------');
+            appendLine('> '+promo);
+            appendLine('> ------------------------');
+            try{ navigator.clipboard.writeText(promo); appendLine('> copied to clipboard.'); }catch(e){}
+          } else if(code==='v7-access'){
+            appendLine('> access granted.');
+            openPane('private');
+          } else {
+            appendLine('> invalid code.');
+          }
+        } else {
+          openPane('access');
+        }
+        break;
       case 'clear': out.textContent=""; break;
-      case 'open':  if(arg==='info'||arg==='access') openPane(arg); else appendLine("> usage: open info|access"); break;
+      case 'private':
+        openPane('private');
+        break;
+      case 'glow': {
+        appendLine('> glow enabled (30s)');
+        document.documentElement.classList.add('glow-warm');
+        setTimeout(()=>{ document.documentElement.classList.remove('glow-warm'); appendLine('> glow expired'); }, 30000);
+        break;
+      }
+      case 'open':  if(arg==='info'||arg==='access'||arg==='private') openPane(arg); else appendLine("> usage: open info|access|private"); break;
       default: appendLine("> unknown. try: help");
     }
   }
@@ -839,7 +915,7 @@
           if (!isMobile() && win.center) win.center();
           loadTrackByIndex(0);
           setStatusDot();
-          typeLines(["> Welcome to SevvynOS", "> type 'store' to open BeatStars"]);
+          typeLines(["> Welcome to SevvynOS", "> type 'store' to open BeatStars", "> type 'private' to view collaborator packs"]);
           if(audioCtx) bootChime();
         }, 280);
       }
