@@ -1,13 +1,15 @@
 
 <!DOCTYPE html>
-<html lang="pl">
+<html lang="en">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>sevvyn – crafted beats & packs</title>
-
+  
 <link rel="icon" href="s_logo.ico">
 
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
 
 <!-- PRELOAD tapety z /public -->
@@ -15,7 +17,7 @@
 
 <style>
   :root{
-    --lime:#00FF88;
+    --lime:#6CFFB4;
     --pink:#FF3399;
     --blue:#2864D8;     /* tytuł okien */
     --blue-d:#1E2A44;   /* pasek podokna */
@@ -31,7 +33,7 @@
   html,body{ height:100%; margin:0 }
   body{
     font-family:"VT323", ui-monospace, Menlo, Consolas, monospace;
-    background-color:#0a0a0a;
+    background-color:#080808;
     overflow-x:hidden;
   }
   .wallpaper{
@@ -149,14 +151,14 @@
   .item:hover{ color:var(--pink); transform:translateX(3px); cursor:pointer }
 
   .out{
-    color:var(--lime); font-size:18px; white-space:pre-line; line-height:1.45;
+    color:var(--lime); font-size:18px; white-space:pre-line; line-height:1.6;
     flex:1 1 auto;
     min-height:160px;
     overflow:auto;
     border-radius:8px; border:1px solid #111;
     background:#060606;
     box-shadow:inset 0 0 0 1px rgba(255,255,255,.02), inset 0 0 35px rgba(0,0,0,.55);
-    padding:12px 14px;
+    padding:18px 20px;
     min-width:0;
   }
   .cli{
@@ -172,14 +174,14 @@
 
   .tline{ white-space:pre-wrap }
   .titem{ display:inline; color:var(--lime); cursor:pointer; padding:2px 2px; border-radius:4px; transition:color .12s, text-shadow .12s, background-color .12s }
-  .titem:hover, .titem:focus{ outline:0; color:#ff6fb3; text-shadow:0 0 8px rgba(255,111,179,.35); background:rgba(255,111,179,.08) }
+  .titem:hover, .titem:focus{ outline:0; color:#ff6fb3; text-shadow:0 0 8px rgba(255,111,179,.35); background:rgba(255,111,179,.08); box-shadow:0 0 0 1px rgba(255,111,179,.25) inset }
 
   .pane{ position:absolute; inset:0; display:flex; opacity:0; transform:scale(.985); pointer-events:none; transition: opacity .18s ease, transform .18s ease }
   .pane.show{ opacity:1; transform:scale(1); pointer-events:auto }
   .hidden{ display:none }
   .pane-chrome{ display:flex; flex-direction:column; width:100%; border:1px solid #111; border-radius:10px; background:#000; overflow:hidden }
   .pane-titlebar{ height:28px; display:flex; align-items:center; gap:8px; padding:0 10px; background:var(--blue-d); color:#eef5ff; border-bottom:1px solid rgba(0,0,0,.55) }
-  .pane-term{ flex:1; padding:12px; overflow:auto; background:#060606; color:var(--lime); font-size:20px; line-height:1.45; border-top:1px solid #111 }
+  .pane-term{ flex:1; padding:18px; overflow:auto; background:#060606; color:var(--lime); font-size:20px; line-height:1.6; border-top:1px solid #111 }
 
   /* ===== DOCK (desktop only) ===== */
   .dock{
@@ -421,10 +423,10 @@ body::after{
   <div class="xpbody">
     <div class="mainview" id="mainview">
       <div class="menu-vertical">
-        <div class="item" data-section="beats">&gt; [beats]</div>
-        <div class="item" data-section="store">&gt; [store]</div>
-        <div class="item" data-section="info">&gt; [info]</div>
-        <div class="item" data-section="access">&gt; [access] <span class="cursor">▌</span></div>
+        <div class="item" data-section="beats" title="Play beats (player)">&gt; [beats]</div>
+        <div class="item" data-section="store" title="BeatStars store">&gt; [store]</div>
+        <div class="item" data-section="info" title="Info & contact">&gt; [info]</div>
+        <div class="item" data-section="access" title="Codes / access">&gt; [access] <span class="cursor">▌</span></div>
       </div>
       <div id="terminal-output" class="out"></div>
       <div class="cli"><span class="chev">›</span><input id="cli-input" autocomplete="off" spellcheck="false" placeholder="type a command (help)" /></div>
@@ -768,9 +770,12 @@ body::after{
     }
   }
 
-  function handleHubAction(section){
+  let __dockShown=false;
+function __showDock(){ if(__dockShown) return; __dockShown=true; dock.style.opacity='1'; dock.style.transform='translateY(0)'; }
+
+function handleHubAction(section){
     if(section==='beats'){
-      loadTrackByIndex(0);
+      
       setStatusDot();
       if(isMobile()) showPlayerMobile();
       else showPlayerDesktop();
@@ -784,7 +789,7 @@ body::after{
   document.querySelectorAll('.menu-vertical .item').forEach(el=>{
     el.tabIndex=0;
     el.addEventListener('click', ()=>{
-      const key=el.dataset.section; if(audioCtx) uiClick();
+      __showDock(); const key=el.dataset.section; if(audioCtx) uiClick();
       if(key!=='store' && key!=='access') typeLines(lines[key]||["> done_"]);
       handleHubAction(key);
     });
@@ -792,7 +797,7 @@ body::after{
   });
 
   function appendLine(t){ const d=document.createElement('div'); d.textContent=t; out.appendChild(d); out.scrollTop=out.scrollHeight; }
-  function runCommand(raw){
+  function runCommand(raw){ __showDock();
     const txt=raw.trim(); if(!txt) return; appendLine("> "+txt); if(audioCtx) uiClick();
     const [cmd,arg]=txt.split(/\s+/);
     switch((cmd||'').toLowerCase()){
@@ -926,11 +931,12 @@ body::after{
         setTimeout(()=>{
           boot.style.display='none';
           document.getElementById('xp-root').style.display='block';
-          if(!isMobile()){ dock.style.opacity='1'; dock.style.transform='translateY(0)'; }
+          try{ document.getElementById('cli-input').focus(); }catch(e){}
+          // dock will appear on first interaction
           if (!isMobile() && win.center) win.center();
-          loadTrackByIndex(0);
+          
           setStatusDot();
-          typeLines(["> Welcome to SevvynOS", "> type 'beats' to listen", "> type 'store' to open BeatStars", "> type 'private' to view collaborator packs"]);
+          typeLines(["> Welcome to SevvynOS", "> type 'beats' to listen or click [beats]", "> type 'store' to open BeatStars", "> type 'private' to view collaborator packs"]);
           if(audioCtx) bootChime();
         }, 280);
       }
