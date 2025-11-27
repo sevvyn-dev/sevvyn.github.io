@@ -21,6 +21,7 @@
             color: #fff;
             font-size: 10px;
             overflow-x: hidden;
+            padding: 20px 0;
         }
 
         /* PIXEL PLAYER HUD */
@@ -768,21 +769,28 @@
         }
         
         /* Panorama city */
-    .bg-city {
-    position: fixed;
-    inset: 0;
-    background: url("public/tapeta.png") center bottom no-repeat;
-    background-size: cover;
-    z-index: -2;
-    }
+        .bg-city {
+            position: fixed;
+            inset: 0;
+            background: url("public/tapeta.png") center bottom no-repeat;
+            background-size: cover;
+            z-index: -2;
+            animation: citymove 50s linear infinite alternate;
+        }
 
-    .bg-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(5, 0, 15, 0.7);
-    z-index: -1;
-    pointer-events: none;
-    }
+        .bg-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(5, 0, 15, 0.45);
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* subtle parallax for city */
+        @keyframes citymove {
+            0% { background-position: center bottom; }
+            100% { background-position: center top; }
+        }
 
     </style>
 </head>
