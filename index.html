@@ -1,957 +1,1238 @@
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pl">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>sevvyn – crafted beats & packs</title>
-  
-<link rel="icon" href="s_logo.ico">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SEVVYN.EXE - Producer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            image-rendering: pixelated;
+        }
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+        body {
+            font-family: 'Press Start 2P', cursive;
+            background: #0D0D10;
+            background-image: 
+                repeating-linear-gradient(0deg, #0D0D10 0px, #0D0D10 1px, #111114 1px, #111114 2px);
+            color: #fff;
+            font-size: 10px;
+            overflow-x: hidden;
+        }
 
-<!-- PRELOAD tapety z /public -->
-<link rel="preload" href="/public/tapeta.png?v=1" as="image" />
+        /* PIXEL PLAYER HUD */
+        .player-hud {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 56px;
+            background: #1a1a1f;
+            border-bottom: 2px solid #8B5CF6;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            gap: 12px;
+            z-index: 1000;
+            box-shadow: 0 2px 0 #8B5CF6;
+        }
 
-<style>
-  :root{
-    --lime:#00ff88;
-    --pink:#FF3399;
-    --blue:#2864D8;     /* tytuł okien */
-    --blue-d:#1E2A44;   /* pasek podokna */
-    --bg:#000;
-    --panel:#050505;
-    --task-top:#3a7cf2; /* dock XP */
-    --task-bot:#1b61d8;
-    --start-top:#33b54a;/* sevvynOS */
-    --start-bot:#1d8f33;
-  }
+        .player-controls {
+            display: flex;
+            gap: 8px;
+        }
 
-  /* TAPETA: IMG + overlay (działa też w webviewach) */
-  html,body{ height:100%; margin:0 }
-  body{
-    font-family:"VT323", ui-monospace, Menlo, Consolas, monospace;
-    background-color:#080808;
-    overflow-x:hidden;
-  }
-  .wallpaper{
-    position:fixed; inset:0; z-index:-1; pointer-events:none;
-  }
-  .wallpaper img{
-    position:absolute; inset:0; width:100%; height:100%;
-    object-fit:cover; image-rendering:auto; transform:translateZ(0);
-  }
-  .wallpaper::after{
-    content:""; position:absolute; inset:0;
-    background:linear-gradient(180deg, rgba(0,0,0,.20), rgba(0,0,0,.38));
-  }
+        .pixel-btn {
+            width: 24px;
+            height: 24px;
+            background: #2a2a2f;
+            border: 2px solid #444;
+            cursor: pointer;
+            position: relative;
+            transition: none;
+        }
 
-  *{ box-sizing:border-box }
+        .pixel-btn:hover {
+            border-color: #FFD24A;
+            box-shadow: 0 0 4px #FFD24A;
+        }
 
-  /* ===== BOOT OVERLAY ===== */
-  .boot{
-    position:fixed; inset:0; background:#000; color:#c8ffd9; display:flex; align-items:center; justify-content:center;
-    z-index:9999; flex-direction:column; gap:18px;
-  }
-  .boot-logo{ display:flex; align-items:center; gap:12px; color:#c8ffd9; font-size:28px; letter-spacing:.5px }
-  .boot-logo .pixelS{ width:48px; height:48px; image-rendering: pixelated }
-  .boot-term{ width:min(600px,90vw); border:1px solid #0f0f0f; background:#050505; padding:14px; border-radius:10px;
-              box-shadow:0 18px 48px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.05) inset; }
-  .boot-line{ color:var(--lime); font-size:20px; white-space:pre-wrap; text-shadow:0 0 4px rgba(0,255,136,.35) }
-  .boot-bar{ width:100%; height:16px; border:1px solid #111; border-radius:2px; background:#0b0b0b; overflow:hidden; margin-top:6px; image-rendering: pixelated; }
-  .boot-fill{
-    height:100%; width:0%;
-    background:
-      repeating-linear-gradient(90deg, rgba(0,255,136,1) 0 6px, rgba(0,255,136,.6) 6px 12px);
-    box-shadow:0 0 8px rgba(0,255,136,.35);
-    transform:translateZ(0);
-  }
+        .pixel-btn:active {
+            transform: translate(1px, 1px);
+        }
 
-  /* ===== WSPÓLNE OKIEN ===== */
-  .xpbar{
-    height:34px; display:flex; align-items:center; justify-content:space-between; gap:10px; padding:0 10px;
-    background: linear-gradient(#3A7BFE, #245EDC 60%, #1E4FB8); color:#eef5ff; border-bottom:1px solid rgba(0,0,0,.45);
-    cursor:grab
-  }
-  .xptitle{ display:flex; align-items:center; gap:8px; font-weight:700; letter-spacing:.2px; text-shadow:0 1px 0 rgba(0,0,0,.35) }
+        .pixel-btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
 
-  /* DIODA STATUSU */
-  .xptitle .dot{ width:10px; height:10px; border-radius:50%; background: radial-gradient(circle at 30% 30%, #fff, #6AB3FF 40%, #1A5CE0 70%); box-shadow:0 0 6px rgba(106,179,255,.9) }
-  .xptitle .dot.green{ background: radial-gradient(circle at 30% 30%, #fff, #7affc2 40%, #11c46a 70%); box-shadow:0 0 8px rgba(0,255,136,.9), 0 0 3px rgba(0,255,136,.6) }
-  .xptitle .dot.orange{ background: radial-gradient(circle at 30% 30%, #fff, #ffd27a 40%, #c48711 70%); box-shadow:0 0 8px rgba(255,173,51,.9), 0 0 3px rgba(255,173,51,.6) }
-  .xptitle .dot.red{ background: radial-gradient(circle at 30% 30%, #fff, #ff9aa1 40%, #c4112a 70%); box-shadow:0 0 8px rgba(255,51,102,.9), 0 0 3px rgba(255,51,102,.6) }
+        .pixel-btn.play::after {
+            width: 0;
+            height: 0;
+            border-left: 8px solid #8B5CF6;
+            border-top: 5px solid transparent;
+            border-bottom: 5px solid transparent;
+        }
 
-  .xpbtns{ display:flex; gap:6px }
-  .xpbtns button{
-    min-width:28px; height:20px; line-height:18px;
-    background: linear-gradient(#F4F4F4, #D8D8D8);
-    border: 1px solid #6C6C6C; border-radius:3px;
-    color:#111; font: 700 13px/1 system-ui; cursor:pointer;
-    box-shadow: inset 0 1px 0 #fff, inset 0 -1px 0 #B8B8B8;
-    transition: filter .12s, transform .05s, box-shadow .12s;
-  }
-  .xpbtns button:hover{ filter:brightness(1.06); box-shadow: 0 0 0 2px rgba(255,255,255,.15) inset, inset 0 1px 0 #fff, inset 0 -1px 0 #B8B8B8; }
-  .xpbtns .close{ background: linear-gradient(#FFB8C9, #FF6B8F); border-color:#B22A4E; color:#200 }
+        .pixel-btn.prev::after {
+            width: 0;
+            height: 0;
+            border-right: 8px solid #666;
+            border-top: 5px solid transparent;
+            border-bottom: 5px solid transparent;
+        }
 
-  /* ===== PLAYER (okno desktop) ===== */
-  .playerwin{
-    position:fixed; left:50%; top:9%; transform:translate(-50%,-9%);
-    width:760px; max-width:96vw; background:var(--bg); color:var(--lime);
-    border:1px solid #0f0f0f; border-radius:10px; overflow:hidden;
-    box-shadow:0 18px 48px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.05) inset;
-    user-select:none; z-index:10; display:none;
-  }
-  .pbody{ padding:10px 12px 12px; background:var(--panel); border-top:1px solid rgba(255,255,255,.06) }
-  .np-row{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:6px }
-  .nowplaying{ font-size:22px; color:var(--lime); text-shadow:0 0 3px rgba(0,255,136,.25) }
-  .ptime{ font-size:18px; color:#9bd6ff }
-  .pcontrols{ display:flex; align-items:center; gap:16px; font-size:22px; color:var(--lime); margin:8px 0 }
-  .pctrl{ cursor:pointer; user-select:none; padding:2px 2px; border-radius:4px }
-  .pctrl:hover, .pctrl:focus{ outline:0; color:var(--pink); text-shadow:0 0 8px rgba(255,51,153,.35) }
-  .psep{ opacity:.25 }
-  .bar{ position:relative; height:12px; border:1px solid #111; background:#0b0b0b; border-radius:8px; overflow:hidden; cursor:pointer }
-  .bar-fill{ position:absolute; inset:0 auto 0 0; width:0; background:var(--lime); box-shadow:0 0 8px rgba(0,255,136,.35) }
-  .bar-load{ position:absolute; inset:0 0 0 auto; width:0; background:#16231d }
+        .pixel-btn.next::after {
+            width: 0;
+            height: 0;
+            border-left: 8px solid #666;
+            border-top: 5px solid transparent;
+            border-bottom: 5px solid transparent;
+        }
 
-  /* ===== TERMINAL ===== */
-  .xpwin{
-    width: 780px; height: 460px; min-width:520px; min-height:340px;
-    max-width:min(96vw,1100px); max-height:min(88vh,900px);
-    position:fixed; left:50%; top:58%; transform:translate(-50%, -58%);
-    color:var(--lime); background:var(--bg);
-    border-radius:10px; overflow:hidden; z-index:9;
-    border:1px solid #0f0f0f;
-    box-shadow:0 24px 60px rgba(0,0,0,.6), 0 8px 22px rgba(0,0,0,.4), 0 0 0 1px rgba(255,255,255,.05) inset;
-    resize:both; display:none;
-  }
+        .waveform {
+            flex: 1;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            overflow: hidden;
+        }
 
-  .xpbody{
-    position:relative;
-    height:calc(100% - 34px);
-    background:#000;
-    display:flex;
-    flex-direction:column;
-    gap:10px;
-    padding:18px 18px 14px;
-    overflow:hidden;
-    min-height:0;
-  }
-  .mainview{
-    display:flex;
-    flex-direction:column;
-    gap:10px;
-    height:100%;
-    min-height:0;
-  }
+        .wave-bar {
+            width: 3px;
+            background: #8B5CF6;
+            transition: height 0.1s;
+        }
 
-  .menu-vertical{ display:flex; flex-direction:column; gap:14px; margin-bottom:0 }
-  .item{ font-size:28px; color:var(--lime); text-shadow:0 0 4px rgba(0,255,136,.28); transition:.12s }
-  .item:hover{ color:var(--pink); transform:translateX(3px); cursor:pointer }
+        .track-info {
+            font-size: 8px;
+            color: #FFD24A;
+            white-space: nowrap;
+        }
 
-  .out{
-    color:var(--lime); font-size:18px; white-space:pre-line; line-height:1.6;
-    flex:1 1 auto;
-    min-height:160px;
-    overflow:auto;
-    border-radius:8px; border:1px solid #111;
-    background:#060606;
-    box-shadow:inset 0 0 0 1px rgba(255,255,255,.02), inset 0 0 35px rgba(0,0,0,.55);
-    padding:18px 20px;
-    min-width:0;
-  }
-  .cli{
-    position:relative; height:40px; display:flex; align-items:center; gap:10px;
-    border-radius:8px; border:1px solid #111; background:#060606; box-shadow:inset 0 0 0 1px rgba(255,255,255,.02);
-    padding:0 12px; color:var(--lime);
-    flex:0 0 auto;
-  }
-  .chev{ color:var(--lime); font-size:22px }
-  #cli-input{ flex:1; background:transparent; border:none; outline:none; font-family:"VT323",monospace; font-size:22px; letter-spacing:.2px; color:#e6fff4; caret-color:var(--pink) }
-  .cursor{ display:inline-block; width:9px; background:var(--lime); animation:blink .9s step-end infinite }
-  @keyframes blink{ 50%{opacity:0} }
+        /* MAIN WINDOW */
+        .container {
+            margin-top: 72px;
+            padding: 16px;
+            display: flex;
+            justify-content: center;
+            height: calc(100vh - 88px);
+        }
 
-  .tline{ white-space:pre-wrap }
-  .titem{ display:inline; color:var(--lime); cursor:pointer; padding:2px 2px; border-radius:4px; transition:color .12s, text-shadow .12s, background-color .12s }
-  .titem:hover, .titem:focus{ outline:0; color:#ff6fb3; text-shadow:0 0 8px rgba(255,111,179,.35); background:rgba(255,111,179,.08); box-shadow:0 0 0 1px rgba(255,111,179,.25) inset }
+        .pixel-window {
+            width: 100%;
+            max-width: 1200px;
+            background: #1a1a1f;
+            border: 3px solid #444;
+            box-shadow: 3px 3px 0 #000;
+            display: flex;
+            flex-direction: column;
+            max-height: 100%;
+        }
 
-  .pane{ position:absolute; inset:0; display:flex; opacity:0; transform:scale(.985); pointer-events:none; transition: opacity .18s ease, transform .18s ease }
-  .pane.show{ opacity:1; transform:scale(1); pointer-events:auto }
-  .hidden{ display:none }
-  .pane-chrome{ display:flex; flex-direction:column; width:100%; border:1px solid #111; border-radius:10px; background:#000; overflow:hidden }
-  .pane-titlebar{ height:28px; display:flex; align-items:center; gap:8px; padding:0 10px; background:var(--blue-d); color:#eef5ff; border-bottom:1px solid rgba(0,0,0,.55) }
-  .pane-term{ flex:1; padding:18px; overflow:auto; background:#060606; color:var(--lime); font-size:20px; line-height:1.6; border-top:1px solid #111 }
+        .window-header {
+            height: 32px;
+            background: #2a2a2f;
+            border-bottom: 2px solid #444;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 8px;
+            flex-shrink: 0;
+        }
 
-  /* ===== DOCK (desktop only) ===== */
-  .dock{
-    position:fixed; left:0; right:0; bottom:0; height:46px; display:flex; align-items:center;
-    background: linear-gradient(var(--task-top), var(--task-bot));
-    border-top:1px solid rgba(0,0,0,.35); box-shadow:0 -2px 10px rgba(0,0,0,.35);
-    padding:0 10px 0 0;
-    z-index:20; gap:10px;
-    font-family:"VT323",monospace;
-    opacity:0; transform:translateY(8px); transition:.25s ease;
-  }
-  .brand{ height:100%; display:flex; align-items:center; gap:10px; padding:0 18px 0 12px;
-    color:#fff; background: linear-gradient(var(--start-top), var(--start-bot));
-    border:1px solid rgba(0,0,0,.45); border-radius:0 12px 12px 0;
-    font-size:22px; text-shadow:0 1px 0 rgba(0,0,0,.4);
-    box-shadow: inset 0 1px 0 rgba(255,255,255,.25);
-    margin-left:0;
-  }
-  .brand .ico{ width:22px; height:22px; image-rendering: pixelated }
-  .divider{ width:2px; height:70%; background:
-      repeating-linear-gradient(0deg, rgba(255,255,255,.6) 0 1px, rgba(255,255,255,.15) 1px 2px);
-    border-left:1px solid rgba(0,0,0,.4); border-right:1px solid rgba(0,0,0,.25);
-    border-radius:2px; margin:0 6px 0 0; image-rendering: pixelated; }
-  .dockapps{ display:flex; gap:8px; align-items:center; }
-  .dockbtn{
-    display:flex; align-items:center; gap:8px; padding:6px 10px; border-radius:8px;
-    color:#e8f2ff;
-    background:
-      repeating-linear-gradient(45deg, rgba(255,255,255,.12) 0 2px, rgba(255,255,255,0) 2px 4px),
-      repeating-linear-gradient(0deg, rgba(0,0,0,.15) 0 1px, rgba(0,0,0,.05) 1px 2px),
-      rgba(255,255,255,.10);
-    border:1px solid rgba(0,0,0,.55);
-    box-shadow:
-      0 0 0 1px rgba(255,255,255,.05) inset,
-      0 1px 0 rgba(255,255,255,.25) inset,
-      0 -1px 0 rgba(0,0,0,.25) inset;
-    font-size:18px; cursor:pointer;
-    font-family:"VT323",monospace;
-    image-rendering: pixelated;
-    transition: filter .12s, transform .05s, background .12s;
-  }
-  .dockbtn:hover{ filter: contrast(1.2) saturate(1) brightness(1.05) }
-  .dockbtn:active{ transform: translateY(1px) }
-  .dockbtn .ico{ width:16px; height:16px; image-rendering: pixelated }
-  .dockbtn.active{
-    background:
-      repeating-linear-gradient(45deg, rgba(255,255,255,.16) 0 2px, rgba(255,255,255,0) 2px 4px),
-      repeating-linear-gradient(0deg, rgba(0,0,0,.22) 0 1px, rgba(0,0,0,.08) 1px 2px),
-      rgba(0,0,0,.28);
-    outline:2px solid rgba(255,255,255,.22)
-  }
-  .tray{ margin-left:auto; display:flex; align-items:center; gap:10px; color:#eef6ff; font-size:18px; padding:6px 10px;
-         background:
-           repeating-linear-gradient(0deg, rgba(255,255,255,.14) 0 2px, rgba(255,255,255,.06) 2px 4px),
-           rgba(255,255,255,.08);
-         border:1px solid rgba(0,0,0,.45); border-radius:8px; font-family:"VT323",monospace; image-rendering: pixelated }
+        .window-title {
+            font-size: 10px;
+            color: #FFD24A;
+        }
 
-  /* ===== MOBILE LAYOUT (<=900px) ===== */
-  .mobile-sticky{ display:none; }
-  @media (max-width: 900px){
-    :root{ --mobilePad:clamp(8px,4vw,14px); --headH:44px; --mbarH:44px; }
-    html,body{height:100%;overflow:hidden}
-    .dock{display:none!important}
+        .window-buttons {
+            display: flex;
+            gap: 4px;
+        }
 
-    /* Sticky TOP player bar */
-    .mobile-sticky{
-      position:fixed;
-      top:env(safe-area-inset-top);
-      left:0; right:0;
-      height:var(--mbarH);
-      background:linear-gradient(#2F69F4, #1F52D6 60%, #1842B0);
-      border-bottom:1px solid rgba(0,0,0,.5);
-      color:#e8fff5;
-      padding:6px var(--mobilePad);
-      align-items:center; gap:12px;
-      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-      z-index:1000;
-      box-shadow:0 8px 16px rgba(0,0,0,.35);
+        .win-btn {
+            width: 12px;
+            height: 12px;
+            border: 2px solid #000;
+        }
+
+        .win-btn.close { background: #ff5555; }
+        .win-btn.minimize { background: #FFD24A; }
+        .win-btn.maximize { background: #55ff55; }
+
+        /* NAVIGATION */
+        .nav-tabs {
+            display: flex;
+            gap: 16px;
+            padding: 16px;
+            border-bottom: 2px solid #444;
+            background: #0D0D10;
+            flex-shrink: 0;
+            overflow-x: auto;
+            overflow-y: hidden;
+            white-space: nowrap;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .nav-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab {
+            background: #2a2a2f;
+            border: 2px solid #444;
+            color: #666;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 11px;
+            cursor: pointer;
+            padding: 12px 24px;
+            position: relative;
+            box-shadow: 3px 3px 0 #000;
+            transition: none;
+            flex-shrink: 0;
+        }
+
+        .tab:hover {
+            color: #FFD24A;
+            border-color: #FFD24A;
+        }
+
+        .tab:active {
+            transform: translate(2px, 2px);
+            box-shadow: none;
+        }
+
+        .tab.active {
+            background: #8B5CF6;
+            color: #fff;
+            border-color: #8B5CF6;
+        }
+
+        /* CONTENT AREA */
+        .content {
+            padding: 32px;
+            min-height: 500px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .content::-webkit-scrollbar {
+            width: 12px;
+        }
+
+        .content::-webkit-scrollbar-track {
+            background: #0D0D10;
+            border-left: 2px solid #444;
+        }
+
+        .content::-webkit-scrollbar-thumb {
+            background: #8B5CF6;
+            border: 2px solid #000;
+        }
+
+        .content::-webkit-scrollbar-thumb:hover {
+            background: #FFD24A;
+        }
+
+        .beat-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .beat-item {
+            background: #2a2a2f;
+            border: 2px solid #444;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: none;
+        }
+
+        .beat-item:hover {
+            border-color: #8B5CF6;
+            box-shadow: 0 0 8px rgba(139, 92, 246, 0.3);
+        }
+
+        .beat-info {
+            flex: 1;
+        }
+
+        .beat-title {
+            font-size: 14px;
+            color: #FFD24A;
+            margin-bottom: 8px;
+        }
+
+        .beat-tags {
+            font-size: 10px;
+            color: #666;
+        }
+
+        .beat-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .action-btn {
+            padding: 12px 24px;
+            background: #8B5CF6;
+            border: 2px solid #000;
+            color: #fff;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 10px;
+            cursor: pointer;
+            box-shadow: 2px 2px 0 #000;
+        }
+
+        .action-btn:hover {
+            background: #FFD24A;
+            color: #000;
+        }
+
+        .action-btn:active {
+            transform: translate(2px, 2px);
+            box-shadow: none;
+        }
+
+        /* ABOUT */
+        .about-card {
+            display: flex;
+            gap: 40px;
+            align-items: start;
+        }
+
+        .pixel-avatar {
+            width: 160px;
+            height: 160px;
+            background: #8B5CF6;
+            border: 3px solid #444;
+            box-shadow: 3px 3px 0 #000;
+        }
+
+        .character-sheet {
+            flex: 1;
+        }
+
+        .character-sheet h2 {
+            font-size: 20px;
+            color: #FFD24A;
+            margin-bottom: 24px;
+        }
+
+        .character-sheet p {
+            font-size: 11px;
+            line-height: 24px;
+            color: #aaa;
+            margin-bottom: 12px;
+        }
+
+        .character-sheet p strong {
+            color: #8B5CF6;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        /* PACKS */
+        .packs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 24px;
+        }
+
+        .pack-card {
+            background: #2a2a2f;
+            border: 3px solid #444;
+            padding: 24px;
+            text-align: center;
+            transition: none;
+        }
+
+        .pack-card:hover {
+            border-color: #FFD24A;
+            transform: translate(-1px, -1px);
+        }
+
+        .pack-icon {
+            width: 96px;
+            height: 96px;
+            background: #8B5CF6;
+            margin: 0 auto 16px;
+            border: 2px solid #000;
+        }
+
+        .pack-title {
+            font-size: 12px;
+            color: #FFD24A;
+            margin-bottom: 12px;
+        }
+
+        .pack-desc {
+            font-size: 9px;
+            color: #666;
+            margin-bottom: 16px;
+        }
+
+        .pack-card.free {
+            border-color: #55aaff;
+        }
+
+        .pack-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .pack-buttons .action-btn {
+            flex: 1;
+            font-size: 9px;
+            padding: 10px;
+        }
+
+        .pack-info-modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #1a1a1f;
+            border: 3px solid #8B5CF6;
+            padding: 24px;
+            z-index: 2000;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 0 0 9999px rgba(0,0,0,0.8);
+        }
+
+        .pack-info-modal.active {
+            display: block;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #444;
+        }
+
+        .modal-title {
+            font-size: 12px;
+            color: #FFD24A;
+        }
+
+        .modal-close {
+            background: #ff5555;
+            border: 2px solid #000;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            font-size: 16px;
+            color: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-close:hover {
+            background: #ff7777;
+        }
+
+        .pack-details {
+            font-size: 8px;
+            line-height: 16px;
+            color: #aaa;
+        }
+
+        .pack-details .price {
+            font-size: 14px;
+            color: #8B5CF6;
+            margin: 16px 0;
+        }
+
+        .pack-details .sounds-list {
+            background: #0D0D10;
+            border: 2px solid #444;
+            padding: 12px;
+            margin: 12px 0;
+        }
+
+        .pack-details .sound-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 4px 0;
+            color: #FFD24A;
+        }
+
+        .pack-details .sound-count {
+            color: #8B5CF6;
+        }
+
+        .modal-buy-btn {
+            width: 100%;
+            padding: 16px;
+            background: #8B5CF6;
+            border: 3px solid #000;
+            color: #fff;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 12px;
+            cursor: pointer;
+            box-shadow: 4px 4px 0 #000;
+            margin-top: 20px;
+        }
+
+        .modal-buy-btn:hover {
+            background: #FFD24A;
+            color: #000;
+            border-color: #000;
+        }
+
+        .modal-buy-btn:active {
+            transform: translate(4px, 4px);
+            box-shadow: none;
+        }
+
+        .modal-buy-btn.free {
+            background: #55aaff;
+        }
+
+        .modal-buy-btn.free:hover {
+            background: #77ccff;
+        }
+
+        /* ACCESS */
+        .access-screen {
+            max-width: 500px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .access-screen h2 {
+            font-size: 18px;
+            color: #8B5CF6;
+            margin-bottom: 32px;
+        }
+
+        .access-info {
+            background: #2a2a2f;
+            border: 2px solid #444;
+            padding: 20px;
+            margin-bottom: 32px;
+            text-align: left;
+        }
+
+        .access-info p {
+            font-size: 10px;
+            line-height: 20px;
+            color: #aaa;
+            margin-bottom: 12px;
+        }
+
+        .access-info .highlight {
+            color: #8B5CF6;
+        }
+
+        .access-info a {
+            color: #FFD24A;
+            text-decoration: none;
+        }
+
+        .access-info a:hover {
+            color: #fff;
+        }
+
+        .access-input {
+            width: 100%;
+            padding: 16px;
+            background: #0D0D10;
+            border: 2px solid #444;
+            color: #FFD24A;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 12px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .access-message {
+            font-size: 10px;
+            margin-top: 20px;
+            min-height: 24px;
+        }
+
+        .access-message.success {
+            color: #55ff55;
+        }
+
+        .access-message.error {
+            color: #ff5555;
+        }
+
+        .access-message.discount {
+            color: #FFD24A;
+        }
+
+        .unlock-content {
+            display: none;
+            margin-top: 32px;
+            background: #2a2a2f;
+            border: 2px solid #55ff55;
+            padding: 24px;
+            text-align: center;
+        }
+
+        .unlock-content.active {
+            display: block;
+        }
+
+        .unlock-title {
+            font-size: 14px;
+            color: #55ff55;
+            margin-bottom: 16px;
+        }
+
+        .unlock-desc {
+            font-size: 9px;
+            color: #aaa;
+            margin-bottom: 20px;
+            line-height: 18px;
+        }
+
+        .download-btn {
+            width: 100%;
+            padding: 16px;
+            background: #55ff55;
+            border: 3px solid #000;
+            color: #000;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 11px;
+            cursor: pointer;
+            box-shadow: 4px 4px 0 #000;
+            margin-top: 12px;
+        }
+
+        .download-btn:hover {
+            background: #77ff77;
+        }
+
+        .download-btn:active {
+            transform: translate(4px, 4px);
+            box-shadow: none;
+        }
+
+        /* CONTACT */
+        .contact-menu {
+            max-width: 600px;
+        }
+
+        .contact-menu h2 {
+            font-size: 18px;
+            color: #FFD24A;
+            margin-bottom: 32px;
+        }
+
+        .contact-item {
+            background: #2a2a2f;
+            border: 2px solid #444;
+            padding: 20px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .contact-item:hover {
+            border-color: #8B5CF6;
+        }
+
+        .contact-item::before {
+            content: '>';
+            color: #8B5CF6;
+            font-size: 16px;
+        }
+
+        .contact-label {
+            font-size: 11px;
+            color: #aaa;
+        }
+
+        .dm-button {
+            width: 100%;
+            margin-top: 24px;
+        }
+
+        .more-beats-btn {
+            width: 100%;
+            padding: 16px;
+            background: #FFD24A;
+            border: 3px solid #000;
+            color: #000;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 11px;
+            cursor: pointer;
+            box-shadow: 4px 4px 0 #000;
+            margin-top: 24px;
+            text-align: center;
+            text-decoration: none;
+            display: block;
+        }
+
+        .more-beats-btn:hover {
+            background: #fff;
+        }
+
+        .more-beats-btn:active {
+            transform: translate(4px, 4px);
+            box-shadow: none;
+        }
+
+        /* MOBILE */
+        @media (max-width: 768px) {
+            .container {
+                padding: 8px;
+                margin-top: 56px;
+                height: calc(100vh - 64px);
+            }
+
+            .player-hud {
+                height: 48px;
+                padding: 0 8px;
+            }
+
+            .track-info {
+                font-size: 6px;
+            }
+
+            .pixel-window {
+                border-width: 2px;
+            }
+
+            .nav-tabs {
+                gap: 6px;
+                padding: 10px 8px;
+            }
+
+            .tab {
+                font-size: 7px;
+                padding: 8px 12px;
+            }
+
+            .content {
+                padding: 16px;
+            }
+
+            .beat-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+
+            .beat-actions {
+                width: 100%;
+            }
+
+            .action-btn {
+                flex: 1;
+            }
+
+            .about-card {
+                flex-direction: column;
+            }
+
+            .packs-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @keyframes flicker {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        .playing {
+            animation: flicker 0.5s infinite;
+        }
+        
+        /* Panorama city */
+    .bg-city {
+    position: fixed;
+    inset: 0;
+    background: url("public/tapeta.png") center bottom no-repeat;
+    background-size: cover;
+    z-index: -2;
     }
-    body.player-open .mobile-sticky{ display:flex !important; }
 
-    .mobile-sticky .mini-title{ color:#f2fff8; opacity:.95; }
-    .mobile-sticky #mstate{ color:#dfeff0; opacity:.55; }
-
-    .xpwin{
-      position:fixed;
-      top:calc(10svh + env(safe-area-inset-top));
-      left:0; right:0; margin:0 auto;
-      width:95vw; max-width:95vw;
-      height:calc(80svh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
-      min-width:0 !important;
-      min-height:0 !important;
-      transform:none !important;
-      resize:none;
-      border-radius:12px;
-      border:1px solid rgba(255,255,255,.08);
-      box-shadow:0 18px 40px rgba(0,0,0,.55);
-      overflow:hidden;
-      display:block;
-      z-index: 900;
-    }
-    body.player-open .xpwin{
-      top:calc(10svh + env(safe-area-inset-top) + var(--mbarH));
-      height:calc(80svh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - var(--mbarH));
-    }
-    @supports (width: 95dvw){
-      .xpwin{ width:95dvw; max-width:95dvw; }
+    .bg-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(5, 0, 15, 0.7);
+    z-index: -1;
+    pointer-events: none;
     }
 
-    .xpbar{ cursor:default; height:var(--headH); padding:6px var(--mobilePad); display:flex; align-items:center; gap:8px; justify-content:space-between; }
-    .xpbtns button{ pointer-events:none; opacity:1; cursor:not-allowed; }
-
-    .xpbody{
-      padding:var(--mobilePad);
-      padding-bottom: calc(var(--mobilePad) + 56px);
-      height:calc(100% - var(--headH));
-      position:relative;
-      display:flex;flex-direction:column;gap:10px;overflow:hidden;min-height:0;
-    }
-
-    .mainview{ height:100%; min-height:0; overflow:hidden; display:flex; flex-direction:column; gap:10px; }
-    .cli{ position:absolute; left:var(--mobilePad); right:var(--mobilePad); bottom:var(--mobilePad); z-index:3; height:44px; display:flex; align-items:center; }
-    .menu-vertical{gap:14px}
-    .item{font-size:30px;padding:6px 2px;line-height:1.1}
-    .out{ flex:1 1 auto; min-height:0; overflow:auto; }
-    .playerwin{ display:none !important; }
-  }
-
-  /* ===== GLOW WARM PINK (command: glow) ===== */
-  :root.glow-warm .xpwin,
-  :root.glow-warm .playerwin,
-  :root.glow-warm .dock{
-    box-shadow:0 0 0 1px rgba(255,105,180,.22) inset,
-               0 0 24px rgba(255,105,180,.18),
-               0 0 64px rgba(255,105,180,.12);
-    border-color: rgba(255,105,180,.28);
-  }
-  :root.glow-warm .xptitle .dot{
-    box-shadow:0 0 10px rgba(255,105,180,.85), 0 0 4px rgba(255,105,180,.6);
-  }
-
-
-body::before{
-  content:"";
-  position:fixed; inset:0; pointer-events:none;
-  background:repeating-linear-gradient(0deg, rgba(255,255,255,0.015) 0 1px, rgba(0,0,0,0.015) 1px 2px);
-  mix-blend-mode:overlay;
-  opacity:.06;
-}
-body::after{
-  content:"";
-  position:fixed; inset:0; pointer-events:none;
-  background:repeating-linear-gradient(180deg, rgba(0,0,0,0.08) 0 3px, transparent 3px 6px);
-  opacity:.07;
-}
-
-</style>
+    </style>
 </head>
 <body>
+<div class="bg-city"></div>
+<div class="bg-overlay"></div>
 
-<!-- TAPETA IMG z /public -->
-<div class="wallpaper" aria-hidden="true">
-  <img src="/public/tapeta.png?v=1" alt="" fetchpriority="high" decoding="async">
-</div>
-
-<!-- ===== BOOT ===== -->
-<div class="boot" id="boot">
-  <div class="boot-logo">
-    <svg class="pixelS" viewBox="0 0 16 16" aria-hidden="true">
-      <rect width="16" height="16" fill="#0b1d14"/>
-      <g fill="#14ff90">
-        <rect x="3" y="3" width="10" height="3"/>
-        <rect x="3" y="6" width="3" height="3"/>
-        <rect x="6" y="8" width="7" height="3"/>
-        <rect x="3" y="11" width="10" height="2"/>
-      </g>
-    </svg>
-    sevvynOS
-  </div>
-  <div class="boot-term">
-    <div class="boot-line" id="b1"></div>
-    <div class="boot-line" id="b2"></div>
-    <div class="boot-line" id="b3"></div>
-    <div class="boot-bar"><div class="boot-fill" id="bfill"></div></div>
-  </div>
-</div>
-
-<!-- ===== STICKY MOBILE PLAYER BAR ===== -->
-<div class="mobile-sticky" id="mobile-player" aria-hidden="true">
-  <span id="mplay" class="mini-btn">[▶︎]</span>
-  <span id="mnext" class="mini-btn">[next]</span>
-  <span class="mini-title" id="mtitle" style="overflow:hidden;text-overflow:ellipsis;">[player]</span>
-  <span id="mstate" style="margin-left:6px;"></span>
-  <span id="mhide" class="mini-btn" style="margin-left:auto">[hide]</span>
-</div>
-
-<!-- ===== PLAYER (okno desktop) ===== -->
-<div class="playerwin" id="player-root">
-  <div class="xpbar" id="pbar">
-    <div class="xptitle"><span class="dot"></span>sevvyn_player.exe</div>
-    <div class="xpbtns">
-      <button id="pmin" title="Minimize">_</button>
-      <button id="pmax" title="Maximize">□</button>
-      <button id="pclose" class="close" title="Close">X</button>
-    </div>
-  </div>
-  <div class="pbody">
-    <div class="np-row">
-      <div class="nowplaying" id="nowPlaying">&gt; [no track loaded]</div>
-      <div class="ptime" id="ptime">00:00 / 00:00</div>
-    </div>
-    <div class="pcontrols" id="pcontrols" aria-label="player controls">
-      <span class="pctrl" tabindex="0" data-act="prev">[prev]</span><span class="psep">|</span>
-      <span class="pctrl" tabindex="0" data-act="play" id="playToggle">[▶︎]</span><span class="psep">|</span>
-      <span class="pctrl" tabindex="0" data-act="next">[next]</span><span class="psep">|</span>
-      <span class="pctrl" tabindex="0" data-act="mute" id="pmute">[mute]</span><span class="psep">|</span>
-      <span class="pctrl" tabindex="0" data-act="vol-">[vol-]</span>
-      <span class="pctrl" tabindex="0" data-act="vol+">[vol+]</span>
-    </div>
-    <div class="bar" id="seekBar" aria-label="Seek">
-      <div class="bar-load" id="loaded"></div>
-      <div class="bar-fill" id="played"></div>
-    </div>
-    <audio id="audio" preload="auto" crossorigin="anonymous"></audio>
-  </div>
-</div>
-
-<!-- ===== TERMINAL ===== -->
-<div class="xpwin" id="xp-root">
-  <div class="xpbar" id="tbar">
-    <div class="xptitle"><span class="dot red" id="statusDot"></span>sevvyn_terminal.exe</div>
-    <div class="xpbtns">
-      <button id="min" title="Minimize">_</button>
-      <button id="max" title="Maximize">□</button>
-      <button id="close" class="close" title="Close">X</button>
-    </div>
-  </div>
-
-  <div class="xpbody">
-    <div class="mainview" id="mainview">
-      <div class="menu-vertical">
-        <div class="item" data-section="beats" title="Play beats (player)">&gt; [beats]</div>
-        <div class="item" data-section="store" title="BeatStars store">&gt; [store]</div>
-        <div class="item" data-section="info" title="Info & contact">&gt; [info]</div>
-        <div class="item" data-section="access" title="Codes / access">&gt; [access] <span class="cursor">▌</span></div>
-      </div>
-      <div id="terminal-output" class="out"></div>
-      <div class="cli"><span class="chev">›</span><input id="cli-input" autocomplete="off" spellcheck="false" placeholder="type a command (help)" /></div>
+    <!-- PIXEL PLAYER HUD -->
+    <div class="player-hud">
+        <div class="player-controls">
+            <button class="pixel-btn prev"></button>
+            <button class="pixel-btn play" id="playBtn"></button>
+            <button class="pixel-btn next"></button>
+        </div>
+        <div class="waveform" id="waveform"></div>
+        <div class="track-info" id="trackInfo">NO TRACK LOADED</div>
     </div>
 
-    <div class="pane hidden" id="pane">
-      <div class="pane-chrome">
-        <div class="pane-titlebar"><div class="xptitle"><span class="dot"></span><span id="paneTitle">/</span></div></div>
-        <div class="pane-term" id="paneTerm"></div>
-      </div>
+    <!-- MAIN CONTAINER -->
+    <div class="container">
+        <div class="pixel-window">
+            <!-- WINDOW HEADER -->
+            <div class="window-header">
+                <span class="window-title">▣ SEVVYN.EXE</span>
+                <div class="window-buttons">
+                    <div class="win-btn close"></div>
+                    <div class="win-btn minimize"></div>
+                    <div class="win-btn maximize"></div>
+                </div>
+            </div>
+
+            <!-- NAVIGATION -->
+            <div class="nav-tabs">
+                <button class="tab active" data-tab="beats">BEATS</button>
+                <button class="tab" data-tab="about">ABOUT</button>
+                <button class="tab" data-tab="packs">PACKS</button>
+                <button class="tab" data-tab="access">ACCESS</button>
+                <button class="tab" data-tab="contact">CONTACT</button>
+            </div>
+
+            <!-- CONTENT -->
+            <div class="content">
+                <!-- BEATS TAB -->
+                <div id="beats-content" class="tab-content">
+                    <div class="beat-list">
+                        <div class="beat-item">
+                            <div class="beat-info">
+                                <div class="beat-title">▶ dover</div>
+                                <div class="beat-tags">dark / melodic [🎵]</div>
+                            </div>
+                            <div class="beat-actions">
+                                <button class="action-btn" onclick="playBeat('dover')">PLAY</button>
+                                <button class="action-btn">DM</button>
+                            </div>
+                        </div>
+                        <div class="beat-item">
+                            <div class="beat-info">
+                                <div class="beat-title">▶ laylow_final</div>
+                                <div class="beat-tags">trap / ambient [🎵]</div>
+                            </div>
+                            <div class="beat-actions">
+                                <button class="action-btn" onclick="playBeat('laylow_final')">PLAY</button>
+                                <button class="action-btn">DM</button>
+                            </div>
+                        </div>
+                        <div class="beat-item">
+                            <div class="beat-info">
+                                <div class="beat-title">▶ amnesia</div>
+                                <div class="beat-tags">atmospheric / dark [🎵]</div>
+                            </div>
+                            <div class="beat-actions">
+                                <button class="action-btn" onclick="playBeat('amnesia')">PLAY</button>
+                                <button class="action-btn">DM</button>
+                            </div>
+                        </div>
+                        <div class="beat-item">
+                            <div class="beat-info">
+                                <div class="beat-title">▶ nightshift</div>
+                                <div class="beat-tags">phonk / aggressive [🎵]</div>
+                            </div>
+                            <div class="beat-actions">
+                                <button class="action-btn" onclick="playBeat('nightshift')">PLAY</button>
+                                <button class="action-btn">DM</button>
+                            </div>
+                        </div>
+                    </div>
+                    <a href="https://www.beatstars.com/" target="_blank" class="more-beats-btn">
+                        LISTEN MORE BEATS →
+                    </a>
+                </div>
+
+                <!-- ABOUT TAB -->
+                <div id="about-content" class="tab-content" style="display: none;">
+                    <div class="about-card">
+                        <div class="pixel-avatar"></div>
+                        <div class="character-sheet">
+                            <h2>SEVVYN</h2>
+                            <p><strong>PRODUCER LVL. 24</strong></p>
+                            <p><strong>SKILLS:</strong> drums, atmospheric textures, mix precision</p>
+                            <p><strong>STYLE:</strong> dark melodic, ambient trap, phonk</p>
+                            <p><strong>NOTABLE PLACEMENTS:</strong> [lista artystów]</p>
+                            <p>Creating beats since 2018. Focused on cinematic soundscapes and hard-hitting drums.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PACKS TAB -->
+                <div id="packs-content" class="tab-content" style="display: none;">
+                    <div class="packs-grid">
+                        <div class="pack-card">
+                            <div class="pack-icon"></div>
+                            <div class="pack-title">ARMORED CORE</div>
+                            <div class="pack-desc">gritty drums kit</div>
+                            <div class="pack-buttons">
+                                <button class="action-btn" onclick="showPackInfo('armored')">INFO</button>
+                                <button class="action-btn">BUY</button>
+                            </div>
+                        </div>
+                        <div class="pack-card">
+                            <div class="pack-icon"></div>
+                            <div class="pack-title">MIDNIGHT VOL.1</div>
+                            <div class="pack-desc">dark melodies pack</div>
+                            <div class="pack-buttons">
+                                <button class="action-btn" onclick="showPackInfo('midnight')">INFO</button>
+                                <button class="action-btn">BUY</button>
+                            </div>
+                        </div>
+                        <div class="pack-card free">
+                            <div class="pack-icon"></div>
+                            <div class="pack-title">STARTER KIT</div>
+                            <div class="pack-desc">free essentials</div>
+                            <div class="pack-buttons">
+                                <button class="action-btn" onclick="showPackInfo('starter')">INFO</button>
+                                <button class="action-btn">FREE</button>
+                            </div>
+                        </div>
+                        <div class="pack-card">
+                            <div class="pack-icon"></div>
+                            <div class="pack-title">PHONK ARSENAL</div>
+                            <div class="pack-desc">808s & percs</div>
+                            <div class="pack-buttons">
+                                <button class="action-btn" onclick="showPackInfo('phonk')">INFO</button>
+                                <button class="action-btn">BUY</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ACCESS TAB -->
+                <div id="access-content" class="tab-content" style="display: none;">
+                    <div class="access-screen">
+                        <h2>ACCESS MODE</h2>
+                        <div class="access-info">
+                            <p class="highlight">UNLOCKS DROP ON INSTAGRAM</p>
+                            <p><a href="https://instagram.com/prodsevvyn" target="_blank">instagram.com/prodsevvyn</a></p>
+                            <p>CODES APPEAR IN STORIES/HIGHLIGHTS</p>
+                            <p>ENTER CODES HERE ↓</p>
+                        </div>
+                        <input type="text" class="access-input" placeholder="ENTER CODE" id="accessCode">
+                        <button class="action-btn" onclick="checkAccess()">SUBMIT</button>
+                        <div class="access-message" id="accessMessage"></div>
+                        
+                        <!-- UNLOCK CONTENT -->
+                        <div class="unlock-content" id="unlockContent">
+                            <div class="unlock-title" id="unlockTitle">ACCESS GRANTED</div>
+                            <div class="unlock-desc" id="unlockDesc"></div>
+                            <div id="downloadButtons"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CONTACT TAB -->
+                <div id="contact-content" class="tab-content" style="display: none;">
+                    <div class="contact-menu">
+                        <h2>CONTACTS</h2>
+                        <a href="https://instagram.com/prodsevvyn" class="contact-item" target="_blank">
+                            <span class="contact-label">Instagram: @prodsevvyn</span>
+                        </a>
+                        <a href="mailto:prodsevvyn@gmail.com" class="contact-item">
+                            <span class="contact-label">Email: prodsevvyn@gmail.com</span>
+                        </a>
+                        <a href="#" class="contact-item">
+                            <span class="contact-label">Discord: [invite link]</span>
+                        </a>
+                        <button class="action-btn dm-button">SEND DM</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
-</div>
 
-<!-- ===== DOCK (desktop) ===== -->
-<div class="dock" id="dock">
-  <div class="brand" aria-hidden="true" title="sevvynOS">
-    <svg class="ico" viewBox="0 0 16 16" aria-hidden="true">
-      <rect width="16" height="16" fill="#0b1d14"/>
-      <g fill="#b8ffd8">
-        <rect x="3" y="3" width="10" height="3"/>
-        <rect x="3" y="6" width="3" height="3"/>
-        <rect x="6" y="8" width="7" height="3"/>
-        <rect x="3" y="11" width="10" height="2"/>
-      </g>
-    </svg>
-    sevvynOS
-  </div>
+    <!-- PACK INFO MODAL -->
+    <div class="pack-info-modal" id="packModal">
+        <div class="modal-header">
+            <div class="modal-title" id="modalTitle">PACK INFO</div>
+            <button class="modal-close" onclick="closePackInfo()">×</button>
+        </div>
+        <div class="pack-details" id="modalContent"></div>
+    </div>
 
-  <div class="divider" aria-hidden="true"></div>
+    <script>
+        const packData = {
+            armored: {
+                name: 'ARMORED CORE',
+                price: '$29.99',
+                description: 'Heavy industrial drums for aggressive beats',
+                sounds: {
+                    'KICKS': 35,
+                    '808s': 20,
+                    'SNARES': 40,
+                    'HI-HATS': 50,
+                    'PERCS': 45,
+                    'FX': 25
+                }
+            },
+            midnight: {
+                name: 'MIDNIGHT VOL.1',
+                price: '$34.99',
+                description: 'Dark atmospheric melodies and textures',
+                sounds: {
+                    'MELODIES': 30,
+                    'PADS': 25,
+                    'PLUCKS': 20,
+                    'BELLS': 15,
+                    'FX': 30
+                }
+            },
+            starter: {
+                name: 'STARTER KIT',
+                price: 'FREE',
+                description: 'Essential sounds to get you started',
+                sounds: {
+                    'KICKS': 10,
+                    '808s': 8,
+                    'SNARES': 12,
+                    'HI-HATS': 15,
+                    'PERCS': 10
+                }
+            },
+            phonk: {
+                name: 'PHONK ARSENAL',
+                price: '$24.99',
+                description: 'Phonk essentials - heavy 808s and crispy percs',
+                sounds: {
+                    '808s': 40,
+                    'KICKS': 25,
+                    'SNARES': 30,
+                    'HI-HATS': 35,
+                    'PERCS': 40,
+                    'VOX': 20
+                }
+            }
+        };
 
-  <div class="dockapps">
-    <button class="dockbtn" id="dock-term" title="show/hide terminal">
-      <svg class="ico" viewBox="0 0 16 16" aria-hidden="true">
-        <rect width="16" height="16" fill="#0b1630"/>
-        <path d="M2 3h12v10H2z" fill="#111d3b"/>
-        <path d="M4 5l3 3-3 3h2l3-3-3-3H4zM9 11h3v1H9z" fill="#eaf2ff"/>
-      </svg>
-      terminal
-    </button>
-    <button class="dockbtn" id="dock-player" title="show/hide player">
-      <svg class="ico" viewBox="0 0 16 16" aria-hidden="true">
-        <rect width="16" height="16" fill="#1a0f0f"/>
-        <path d="M2 4h12v8H2z" fill="#2a1a1a"/>
-        <circle cx="5" cy="10" r="2" fill="#eaf2ff"/><circle cx="11" cy="10" r="2" fill="#eaf2ff"/>
-        <rect x="5" y="5" width="6" height="1" fill="#eaf2ff"/>
-      </svg>
-      player
-    </button>
-  </div>
+        function showPackInfo(packId) {
+            const pack = packData[packId];
+            const modal = document.getElementById('packModal');
+            const title = document.getElementById('modalTitle');
+            const content = document.getElementById('modalContent');
 
-  <div class="tray" title="clock">
-    <svg class="ico" viewBox="0 0 16 16" fill="#eaf2ff"><path d="M8 1a7 7 0 1 1 0 14A7 7 0 0 1 8 1zm.5 3h-1v4.2l3.2 1.8.5-.87L8.5 7.2V4z"/></svg>
-    <span id="clock">--:--</span>
-  </div>
-</div>
+            title.textContent = pack.name;
+            
+            let soundsList = '<div class="sounds-list">';
+            for (const [sound, count] of Object.entries(pack.sounds)) {
+                soundsList += `<div class="sound-item"><span>${sound}</span><span class="sound-count">${count}x</span></div>`;
+            }
+            soundsList += '</div>';
 
-<script>
-  const TRACKS = [
-    { title: "conjuring.wav — dark / 160bpm", src: "https://dl.dropboxusercontent.com/scl/fi/rp9hsoathv890oeqlo369/conjuring.wav?rlkey=drop65f2v7engr45pesls8fac&st=071c94p5" },
-    { title: "always_happy.wav — dreamy / 150bpm", src: "https://cdn.example.com/audio/always_happy.mp3" },
-    { title: "crystal_castles.mp3 — glitchy / 155bpm", src: "https://cdn.example.com/audio/crystal_castles.mp3" }
-  ];
-  const BEATSTARS_URL = "https://www.beatstars.com/sevvyn_";
-  const isMobile = () => window.matchMedia("(max-width: 900px)").matches;
+            content.innerHTML = `
+                <p>${pack.description}</p>
+                <div class="price">${pack.price}</div>
+                <p>INCLUDED SOUNDS:</p>
+                ${soundsList}
+                <p>FORMAT: WAV 24-bit</p>
+                <button class="modal-buy-btn ${pack.price === 'FREE' ? 'free' : ''}" onclick="buyPack('${packId}')">
+                    ${pack.price === 'FREE' ? 'DOWNLOAD FREE' : 'BUY NOW - ' + pack.price}
+                </button>
+            `;
 
-  /* WebAudio SFX */
-  let audioCtx=null, comp, master;
-  const active = new Set(); const MAX_VOICES=6;
-  function initAudio(){ if(audioCtx) return;
-    audioCtx = new (window.AudioContext||window.webkitAudioContext)();
-    comp = audioCtx.createDynamicsCompressor();
-    comp.threshold.value=-26; comp.knee.value=30; comp.ratio.value=8; comp.attack.value=0.004; comp.release.value=0.18;
-    master = audioCtx.createGain(); master.gain.value=0.08;
-    comp.connect(master); master.connect(audioCtx.destination);
-  }
-  function limitVoices(src){ if(active.size>=MAX_VOICES){ const f=active.values().next().value; try{f.stop()}catch{}; active.delete(f); } active.add(src); src.onended=()=>active.delete(src); }
-  function clickSfx(level=0.6, freq=1200, dur=0.035){
-    if(!audioCtx) return;
-    const len=Math.max(1,Math.floor(dur*audioCtx.sampleRate));
-    const buf=audioCtx.createBuffer(1,len,audioCtx.sampleRate), d=buf.getChannelData(0);
-    for(let i=0;i<len;i++) d[i]=(Math.random()*2-1)*(1-i/len);
-    const src=audioCtx.createBufferSource(); src.buffer=buf;
-    const bp=audioCtx.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=freq; bp.Q.value=1.2;
-    const g=audioCtx.createGain(); const now=audioCtx.currentTime;
-    g.gain.setValueAtTime(0,now); g.gain.linearRampToValueAtTime(level,now+0.004); g.gain.exponentialRampToValueAtTime(0.0001,now+dur);
-    src.connect(bp); bp.connect(g); g.connect(comp); limitVoices(src); src.start(now); src.stop(now+dur+0.03);
-  }
-  const uiClick = ()=> clickSfx(0.45, 1100, 0.03);
-  const typeTick = ()=> clickSfx(0.30, 650, 0.018);
-  function bootChime(){ if(!audioCtx) return; const freqs=[523.25,659.25,783.99]; const now=audioCtx.currentTime;
-    freqs.forEach((f,i)=>{ const o=audioCtx.createOscillator(); o.type='sine'; o.frequency.value=f;
-      const g=audioCtx.createGain(); g.gain.value=0; g.gain.linearRampToValueAtTime(0.22,now+0.02+i*0.01); g.gain.exponentialRampToValueAtTime(0.0001,now+0.6+i*0.01);
-      o.connect(g); g.connect(comp); o.start(now); o.stop(now+0.7+i*0.02);
-    });
-  }
-  const primeAudio = ()=>{ initAudio(); document.removeEventListener('pointerdown', primeAudio); document.removeEventListener('keydown', primeAudio); };
-  document.addEventListener('pointerdown', primeAudio, {once:true});
-  document.addEventListener('keydown', primeAudio, {once:true});
-
-  function dragWindow(root, handle, yPercent){
-    let sx=0, sy=0, dragging=false;
-    handle.addEventListener('pointerdown',(e)=>{
-      dragging=true; handle.setPointerCapture(e.pointerId);
-      const r=root.getBoundingClientRect(); sx=e.clientX-r.left; sy=e.clientY-r.top;
-      handle.style.cursor='grabbing'; if(audioCtx) uiClick();
-    });
-    handle.addEventListener('pointermove',(e)=>{ if(!dragging) return; const x=e.clientX-sx, y=e.clientY-sy; root.style.left=x+'px'; root.style.top=y+'px'; root.style.transform='translate(0,0)'; });
-    handle.addEventListener('pointerup',()=>{ dragging=false; handle.style.cursor='grab'; });
-    root.center = ()=>{ root.style.left='50%'; root.style.top=yPercent+'%'; root.style.transform=`translate(-50%, -${yPercent}%)`; };
-  }
-
-  const pRoot=document.getElementById('player-root'), pBar=document.getElementById('pbar');
-  const pMin=document.getElementById('pmin'), pMax=document.getElementById('pmax'), pClose=document.getElementById('pclose');
-  const audio=document.getElementById('audio'), nowPlaying=document.getElementById('nowPlaying'), ptime=document.getElementById('ptime');
-  const seekBar=document.getElementById('seekBar'), loadedEl=document.getElementById('loaded'), playedEl=document.getElementById('played');
-  const pcontrols=document.getElementById('pcontrols'), playToggle=document.getElementById('playToggle'), pmute=document.getElementById('pmute');
-
-  const mbar = document.getElementById('mobile-player');
-  const mplay = document.getElementById('mplay');
-  const mnext = document.getElementById('mnext');
-  const mtitle = document.getElementById('mtitle');
-  const mstate = document.getElementById('mstate');
-  const mhide = document.getElementById('mhide');
-
-  const statusDot = document.getElementById('statusDot');
-  function setStatusDot(){
-    statusDot.classList.remove('green','orange','red');
-    if (audio.src && !audio.paused) statusDot.classList.add('green');
-    else if (audio.currentTime > 0 && audio.paused) statusDot.classList.add('orange');
-    else statusDot.classList.add('red');
-  }
-
-  function fmt(t){ if(!isFinite(t)) return "00:00"; const m=Math.floor(t/60), s=Math.floor(t%60); return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`; }
-  const cleanTitle = t => t.split(' —')[0].split(' -')[0];
-  let rafId=null, currentIndex=0;
-
-  function uiUpdate(){
-    const d=audio.duration||0, c=audio.currentTime||0;
-    ptime.textContent=`${fmt(c)} / ${fmt(d)}`;
-    playedEl.style.width = `${(d?c/d:0)*100}%`;
-    if(audio.buffered && audio.buffered.length){ const end=audio.buffered.end(audio.buffered.length-1); loadedEl.style.width=`${(d?end/d:0)*100}%`; }
-    mstate.textContent = audio.paused ? '[paused]' : '[playing]';
-    mplay.textContent = audio.paused ? '[▶︎]' : '[‖]';
-    setStatusDot();
-    rafId = requestAnimationFrame(uiUpdate);
-  }
-  function loadTrackByIndex(i){
-    currentIndex = (i+TRACKS.length)%TRACKS.length;
-    audio.src = TRACKS[currentIndex].src;
-    const t = cleanTitle(TRACKS[currentIndex].title);
-    nowPlaying.textContent = `> [${t}]`;
-    mtitle.textContent = t;
-    setStatusDot();
-  }
-  function nextTrack(){ loadTrackByIndex(currentIndex+1); audio.play().catch(()=>{}); }
-  function prevTrack(){ loadTrackByIndex(currentIndex-1); audio.play().catch(()=>{}); }
-
-  audio.addEventListener('play', ()=>{ cancelAnimationFrame(rafId); playToggle.textContent='[‖]'; setStatusDot(); uiUpdate(); });
-  audio.addEventListener('pause', ()=>{ cancelAnimationFrame(rafId); playToggle.textContent='[▶︎]'; setStatusDot(); });
-  audio.addEventListener('loadedmetadata', ()=> { setStatusDot(); uiUpdate(); });
-  audio.addEventListener('ended', ()=>{ nextTrack(); });
-
-  const win=document.getElementById('xp-root'), tBar=document.getElementById('tbar');
-  const minBtn=document.getElementById('min'), maxBtn=document.getElementById('max'), closeBtn=document.getElementById('close');
-  const out=document.getElementById('terminal-output'), cli=document.getElementById('cli-input');
-  const mainview=document.getElementById('mainview'), pane=document.getElementById('pane'), paneTitle=document.getElementById('paneTitle'), paneTerm=document.getElementById('paneTerm');
-
-  function applyBindings(){
-    if (!isMobile()){
-      dragWindow(pRoot, document.getElementById('pbar'), 9);
-      dragWindow(win, tBar, 58);
-    }
-  }
-  applyBindings();
-  window.addEventListener('resize', applyBindings);
-
-  const lines={
-    beats:["> opening player...", "> loading tracks...", "> done_"],
-    store:["> opening BeatStars portal...", "> please wait.", "> connected ✅", "> done_"],
-    info:["> whoami: producer from Poland", "> sound: melodic plug + digital emotion", "> links: instagram / soundcloud / mail", "> done_"],
-    access:["> [back]", "> unlocks drop on instagram", "> follow: instagram.com/sevvyn", "> codes appear in stories/highlights", "> enter codes here: access <code>", "> done_"]
-  };
-
-  function typeWriteLineToLogs(text, speed=14){
-    return new Promise(resolve=>{
-      const line=document.createElement('div'); out.appendChild(line);
-      let i=0, step=0;
-      const iv=setInterval(()=>{
-        line.textContent=text.slice(0,++i);
-        if(audioCtx && (++step%3===0)) typeTick();
-        if(i>=text.length){ clearInterval(iv); resolve(); }
-        out.scrollTop=out.scrollHeight;
-      }, speed);
-    });
-  }
-
-  function typeLines(arr){
-    out.textContent=""; let i=0;
-    (function next(){
-      if(i>=arr.length) return;
-      const line=document.createElement('div'); out.appendChild(line);
-      let c=0, step=0;
-      const iv=setInterval(()=>{
-        line.textContent=arr[i].slice(0,++c);
-        if(audioCtx && (++step%3===0)) typeTick();
-        if(c>=arr[i].length){ clearInterval(iv); i++; setTimeout(next,100); }
-        out.scrollTop=out.scrollHeight;
-      },14);
-    })();
-  }
-
-  function clearPane(){ paneTerm.innerHTML=""; }
-  function addPaneLine(html){ const d=document.createElement('div'); d.className='tline'; d.innerHTML=html; paneTerm.appendChild(d); paneTerm.scrollTop=paneTerm.scrollHeight; return d; }
-  const sleep=ms=>new Promise(r=>setTimeout(r,ms));
-  async function typePaneLines(strings, perChar=12, gap=90){
-    for(const s of strings){
-      const el=addPaneLine(""); let i=0, st=0;
-      await new Promise(res=>{
-        const iv=setInterval(()=>{
-          el.textContent=s.slice(0,++i);
-          if(audioCtx && (++st%3===0)) typeTick();
-          if(i>=s.length){ clearInterval(iv); setTimeout(res,gap); }
-          paneTerm.scrollTop=paneTerm.scrollHeight;
-        },perChar);
-      });
-    }
-  }
-
-  function attachBack(){
-    const node=[...paneTerm.querySelectorAll('.tline')].find(n=>/\[back\]/i.test(n.textContent));
-    if(node){
-      node.innerHTML=node.textContent.replace(/\[back\]/i,'<span class="titem" data-back>[back]</span>');
-      const b = paneTerm.querySelector('[data-back]');
-      b.addEventListener('click', ()=> closePane());
-      b.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' ') { e.preventDefault(); closePane(); }});
-    }
-  }
-
-  function renderInfo(){
-    return [
-      `> [back]`,
-      `> whoami: producer from poland`,
-      `> style: melodic plug + emotional trap`,
-      `> links:`,
-      `> instagram.com/sevvyn`,
-      `> soundcloud.com/sevvyn`,
-      `> book@sevvyn.studio`,
-      `done_`
-    ];
-  }
-
-  async function renderPane(section){
-    clearPane(); await typePaneLines([`loading /${section}...`],12,110); await sleep(200);
-
-    if(section==='info'){
-      const list = renderInfo();
-      await typePaneLines(list);
-      attachBack();
-      [...paneTerm.querySelectorAll('.tline')].forEach(n=>{
-        const t=n.textContent.toLowerCase();
-        if(t.includes('instagram.com')) n.innerHTML=`> <a class="titem" href="https://instagram.com/sevvyn" target="_blank" rel="noopener">[instagram.com/sevvyn]</a>`;
-        if(t.includes('soundcloud.com')) n.innerHTML=`> <a class="titem" href="https://soundcloud.com/sevvyn" target="_blank" rel="noopener">[soundcloud.com/sevvyn]</a>`;
-        if(t.includes('@')||t.includes('studio')) n.innerHTML=`> <a class="titem" href="mailto:book@sevvyn.studio" target="_blank" rel="noopener">[book@sevvyn.studio]</a>`;
-      });
-      return;
-    }
-
-    if(section==='access'){
-      await typePaneLines([
-        `> [back]`,
-        `> unlocks drop on instagram`,
-        `> follow: instagram.com/sevvyn`,
-        `> codes appear in stories/highlights`,
-        `> enter codes here: access <code>`,
-        `> done_`
-      ]);
-      attachBack();
-      // linkify instagram inside the access pane
-      [...paneTerm.querySelectorAll('.tline')].forEach(n=>{
-        const t=n.textContent.toLowerCase();
-        if(t.includes('instagram.com/sevvyn')) n.innerHTML=`> <a class="titem" href="https://instagram.com/sevvyn" target="_blank" rel="noopener">[instagram.com/sevvyn]</a>`;
-      });
-      return;
-    }
-
-    if(section==='beats'){
-      await typePaneLines([`> [back]`,`> player loaded`,`> use [▶︎] to start`,`done_`]);
-      attachBack(); return;
-    }
-    if(section==='private'){
-      await typePaneLines([
-        `> [back]`,
-        `> private packs are available only for collaborators`,
-        `>`,
-        `> if you're actually BUILDING something:`,
-        `> reach out:`,
-        `>`,
-        `> email → book@sevvyn.studio`,
-        `> instagram dm → instagram.com/sevvyn`,
-        `>`,
-        `> subject: "v7 access"`,
-        `> include:`,
-        `> - your IG`,
-        `> - latest work / vibe reference`,
-        `> - what you're aiming for`,
-        `done_`
-      ]);
-      attachBack(); return;
-    }
-  }
-
-  function openPane(key){ paneTitle.textContent=`/${key}`; mainview.classList.add('hidden'); pane.classList.remove('hidden'); requestAnimationFrame(()=> pane.classList.add('show')); renderPane(key); }
-  function closePane(){ pane.classList.remove('show'); setTimeout(()=>{ pane.classList.add('hidden'); mainview.classList.remove('hidden'); },160); }
-
-  function showPlayerDesktop(){
-    pRoot.style.display='block';
-    if (pRoot.center) pRoot.center();
-    document.getElementById('dock-player')?.classList.add('active');
-  }
-  function showPlayerMobile(){
-    document.body.classList.add('player-open');
-  }
-
-  async function runStoreFlowInLogs(){
-    out.textContent = "";
-    await typeWriteLineToLogs("> opening BeatStars portal...", 14);
-    await sleep(300);
-    await typeWriteLineToLogs("> please wait.", 14);
-    await sleep(1500);
-    await typeWriteLineToLogs("> connected ✅", 14);
-    await sleep(300);
-
-    if (isMobile()){
-      await typeWriteLineToLogs("> switching to BeatStars...", 14);
-      location.href = BEATSTARS_URL;
-    } else {
-      window.open(BEATSTARS_URL, "_blank", "noopener,noreferrer");
-      await typeWriteLineToLogs("> opening portal in new tab...", 14);
-      await typeWriteLineToLogs("> done_", 14);
-    }
-  }
-
-  let __dockShown=false;
-function __showDock(){ if(__dockShown) return; __dockShown=true; dock.style.opacity='1'; dock.style.transform='translateY(0)'; }
-
-function handleHubAction(section){
-    if(section==='beats'){
-      
-      setStatusDot();
-      if(isMobile()) showPlayerMobile();
-      else showPlayerDesktop();
-    } else if(section==='store'){
-      runStoreFlowInLogs();
-    } else if(section==='info' || section==='access'){
-      openPane(section);
-    }
-  }
-
-  document.querySelectorAll('.menu-vertical .item').forEach(el=>{
-    el.tabIndex=0;
-    el.addEventListener('click', ()=>{
-      __showDock(); const key=el.dataset.section; if(audioCtx) uiClick();
-      if(key!=='store' && key!=='access') typeLines(lines[key]||["> done_"]);
-      handleHubAction(key);
-    });
-    el.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' ') el.click(); });
-  });
-
-  function appendLine(t){ const d=document.createElement('div'); d.textContent=t; out.appendChild(d); out.scrollTop=out.scrollHeight; }
-  function runCommand(raw){ __showDock();
-    const txt=raw.trim(); if(!txt) return; appendLine("> "+txt); if(audioCtx) uiClick();
-    const [cmd,arg]=txt.split(/\s+/);
-    switch((cmd||'').toLowerCase()){
-      case 'help': appendLine("> commands: beats | store | info | access <code> | private | glow | clear | open <info|access|private>"); break;
-      case 'beats': typeLines(lines.beats); handleHubAction('beats'); break;
-      case 'store': runStoreFlowInLogs(); break;
-      case 'info':  typeLines(lines.info);  openPane('info'); break;
-      case 'access':
-        if(arg){
-          const code = String(arg).toLowerCase();
-          if(code==='beyourself'){
-            const promo='SEVVYN10';
-            appendLine('> code accepted.');
-            appendLine('> BeatStars discount code:');
-            appendLine('> ------------------------');
-            appendLine('> '+promo);
-            appendLine('> ------------------------');
-            try{ navigator.clipboard.writeText(promo); appendLine('> copied to clipboard.'); }catch(e){}
-          } else if(code==='v7-access'){
-            appendLine('> access granted.');
-            openPane('private');
-          } else {
-            appendLine('> invalid code.');
-          }
-        } else {
-          openPane('access');
+            modal.classList.add('active');
         }
-        break;
-      case 'clear': out.textContent=""; break;
-      case 'private':
-        openPane('private');
-        break;
-      case 'glow': {
-        appendLine('> glow enabled (30s)');
-        document.documentElement.classList.add('glow-warm');
-        setTimeout(()=>{ document.documentElement.classList.remove('glow-warm'); appendLine('> glow expired'); }, 30000);
-        break;
-      }
-      case 'open':  if(arg==='info'||arg==='access'||arg==='private') openPane(arg); else appendLine("> usage: open info|access|private"); break;
-      default: appendLine("> unknown. try: help");
-    }
-  }
-  document.getElementById('cli-input').addEventListener('keydown', e=>{ if(e.key==='Enter'){ runCommand(e.target.value); e.target.value=""; } });
 
-  async function logInitPlayback(){
-    await typeWriteLineToLogs("> initializing playback...", 14);
-    const t = (document.getElementById('nowPlaying').textContent.match(/\[(.*)\]/)||[])[1] || "track";
-    await typeWriteLineToLogs(`> ${t} started_`, 14);
-  }
+        function closePackInfo() {
+            document.getElementById('packModal').classList.remove('active');
+        }
 
-  function handlePlayerAction(act){
-    if(audioCtx) uiClick();
-    if(act==='play'){
-      if(audio.paused){
-        audio.play().then(()=>{ setStatusDot(); logInitPlayback(); }).catch(()=>{});
-      }else{
-        audio.pause();
-        setStatusDot();
-      }
-    }
-    else if(act==='next'){ nextTrack(); setStatusDot(); }
-    else if(act==='prev'){ prevTrack(); setStatusDot(); }
-    else if(act==='mute'){ audio.muted=!audio.muted; pmute.textContent = audio.muted ? '[unmute]' : '[mute]'; }
-    else if(act==='vol-'){ audio.volume=Math.max(0, +(audio.volume-0.1).toFixed(1)); }
-    else if(act==='vol+'){ audio.volume=Math.min(1, +(audio.volume+0.1).toFixed(1)); }
-  }
-  document.getElementById('pcontrols').addEventListener('click', e=>{ const a=e.target.closest('.pctrl'); if(a) handlePlayerAction(a.dataset.act); });
-  document.getElementById('pcontrols').addEventListener('keydown', e=>{ const a=e.target.closest('.pctrl'); if(a && (e.key==='Enter'||e.key===' ')){ e.preventDefault(); handlePlayerAction(a.dataset.act); }});
-  mplay.addEventListener('click', ()=> handlePlayerAction('play'));
-  mnext.addEventListener('click', ()=> handlePlayerAction('next'));
-  mhide.addEventListener('click', ()=>{ document.body.classList.remove('player-open'); });
+        function buyPack(packId) {
+            const pack = packData[packId];
+            alert(`Redirecting to checkout for ${pack.name}...`);
+            // Tutaj dodaj link do płatności lub download
+        }
 
-  const dock=document.getElementById('dock');
-  const dockTerm=document.getElementById('dock-term'), dockPlayer=document.getElementById('dock-player');
+        // Close modal on background click
+        document.getElementById('packModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closePackInfo();
+            }
+        });
 
-  function minimizeFixed(which){
-    if(audioCtx) uiClick();
-    if(which==='terminal'){ win.style.display='none'; dockTerm.classList.remove('active'); }
-    else { pRoot.style.display='none'; dockPlayer.classList.remove('active'); }
-  }
-  function restoreFixed(which){
-    if(audioCtx) uiClick();
-    if(which==='terminal'){ win.style.display='block'; if(win.center) win.center(); dockTerm.classList.add('active'); }
-    else { showPlayerDesktop(); }
-  }
+        // Waveform animation
+        const waveform = document.getElementById('waveform');
+        for (let i = 0; i < 40; i++) {
+            const bar = document.createElement('div');
+            bar.className = 'wave-bar';
+            bar.style.height = Math.random() * 20 + 5 + 'px';
+            waveform.appendChild(bar);
+        }
 
-  document.getElementById('min').addEventListener('click', ()=> minimizeFixed('terminal'));
-  document.getElementById('close').addEventListener('click', ()=> minimizeFixed('terminal'));
-  document.getElementById('max').addEventListener('click', ()=>{
-    if(audioCtx) uiClick();
-    if (win.dataset.max==='1'){ win.dataset.max='0'; win.style.width='780px'; win.style.height='460px'; if(win.center) win.center(); }
-    else { win.dataset.max='1'; win.style.width='min(1100px,96vw)'; win.style.height='min(800px,88vh)'; if(win.center) win.center(); }
-  });
+        function animateWaveform() {
+            const bars = waveform.querySelectorAll('.wave-bar');
+            bars.forEach(bar => {
+                bar.style.height = Math.random() * 20 + 5 + 'px';
+            });
+        }
 
-  pMin.addEventListener('click', ()=> minimizeFixed('player'));
-  pClose.addEventListener('click', ()=> minimizeFixed('player'));
-  pMax.addEventListener('click', ()=>{
-    if(audioCtx) uiClick();
-    if (pRoot.dataset.max==='1'){ pRoot.dataset.max='0'; pRoot.style.width='760px'; pRoot.style.height='auto'; if(pRoot.center) pRoot.center(); }
-    else { pRoot.dataset.max='1'; pRoot.style.width='min(1100px,96vw)'; pRoot.style.height='auto'; if(pRoot.center) pRoot.center(); }
-  });
+        let waveInterval;
+        const playBtn = document.getElementById('playBtn');
+        let isPlaying = false;
 
-  dockTerm.addEventListener('click', ()=>{ if(win.style.display==='none'){ restoreFixed('terminal'); } else { minimizeFixed('terminal'); } });
-  dockPlayer.addEventListener('click', ()=>{ if(pRoot.style.display==='none'){ restoreFixed('player'); } else { minimizeFixed('player'); } });
+        playBtn.addEventListener('click', () => {
+            isPlaying = !isPlaying;
+            if (isPlaying) {
+                playBtn.classList.add('playing');
+                waveInterval = setInterval(animateWaveform, 100);
+            } else {
+                playBtn.classList.remove('playing');
+                clearInterval(waveInterval);
+            }
+        });
 
-  const clock=document.getElementById('clock');
-  function tick(){ const d=new Date(); clock.textContent=String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); }
-  tick(); setInterval(tick,30*1000);
+        // Tab switching
+        const tabs = document.querySelectorAll('.tab');
+        const contents = document.querySelectorAll('.tab-content');
 
-  function typeTo(el, text, speed=16){
-    return new Promise(res=>{
-      let i=0; const iv=setInterval(()=>{ el.textContent=text.slice(0,++i); if(audioCtx && (i%3===0)) typeTick(); if(i>=text.length){ clearInterval(iv); res(); } }, speed);
-    });
-  }
-  async function boot(){
-    const boot=document.getElementById('boot');
-    const b1=document.getElementById('b1'), b2=document.getElementById('b2'), b3=document.getElementById('b3'), bf=document.getElementById('bfill');
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
 
-    await typeTo(b1, "> initializing sevvynOS kernel...", 14);
-    await typeTo(b2, "> loading audio drivers... ok", 14);
-    await typeTo(b3, "> mounting /ui ... ok", 14);
+                const tabName = tab.dataset.tab;
+                contents.forEach(content => {
+                    content.style.display = 'none';
+                });
+                document.getElementById(tabName + '-content').style.display = 'block';
+            });
+        });
 
-    let p=0; const step=4;
-    const timer=setInterval(()=>{
-      p=Math.min(100,p+step);
-      bf.style.width=p+"%";
-      if(p>=100){
-        clearInterval(timer);
-        boot.style.transition='opacity .28s ease';
-        boot.style.opacity='0';
-        setTimeout(()=>{
-          boot.style.display='none';
-          document.getElementById('xp-root').style.display='block';
-          try{ document.getElementById('cli-input').focus(); }catch(e){}
-          // dock will appear on first interaction
-          if (!isMobile() && win.center) win.center();
-          
-          setStatusDot();
-          typeLines(["> Welcome to SevvynOS", "> type 'beats' to listen or click [beats]", "> type 'store' to open BeatStars", "> type 'private' to view collaborator packs"]);
-          if(audioCtx) bootChime();
-        }, 280);
-      }
-    }, 90);
-  }
-  boot();
+        // Play beat function
+        function playBeat(beatName) {
+            document.getElementById('trackInfo').textContent = 'NOW PLAYING: ' + beatName.toUpperCase();
+            playBtn.classList.add('playing');
+            isPlaying = true;
+            if (waveInterval) clearInterval(waveInterval);
+            waveInterval = setInterval(animateWaveform, 100);
+        }
 
-  function seekAt(e){ const r=seekBar.getBoundingClientRect(); const x=Math.min(Math.max(0,e.clientX-r.left),r.width); audio.currentTime=(audio.duration||0)*(x/r.width); if(audioCtx) clickSfx(0.25,800,0.02); setStatusDot(); }
-  let seeking=false; seekBar.addEventListener('pointerdown',e=>{ seeking=true; seekAt(e); seekBar.setPointerCapture(e.pointerId); });
-  seekBar.addEventListener('pointermove',e=>{ if(seeking) seekAt(e) }); seekBar.addEventListener('pointerup',()=> seeking=false);
-</script>
+        // Access check
+        const accessCodes = {
+            // Private packs
+            'SEVVYN2024': {
+                type: 'pack',
+                title: 'PRIVATE PACK 01 UNLOCKED',
+                description: 'EXCLUSIVE DRUMS & MELODIES\n50 premium sounds\nNever released before',
+                downloads: [
+                    { label: 'DOWNLOAD - DROPBOX', url: 'https://dropbox.com/your-link' },
+                    { label: 'DOWNLOAD - GOOGLE DRIVE', url: 'https://drive.google.com/your-link' }
+                ]
+            },
+            'DARKWAVE': {
+                type: 'pack',
+                title: 'DARKWAVE KIT UNLOCKED',
+                description: 'ATMOSPHERIC PACK\n40 dark textures & pads\nLimited release',
+                downloads: [
+                    { label: 'DOWNLOAD - DROPBOX', url: 'https://dropbox.com/darkwave' }
+                ]
+            },
+            'RAPPERKIT': {
+                type: 'pack',
+                title: 'FREE BEATS FOR RAPPERS',
+                description: '10 FREE BEATS - MP3 + WAV\nReady to record\nNon-profit use only',
+                downloads: [
+                    { label: 'DOWNLOAD BEATS - DROPBOX', url: 'https://dropbox.com/rapperkit' },
+                    { label: 'DOWNLOAD BEATS - GOOGLE DRIVE', url: 'https://drive.google.com/rapperkit' }
+                ]
+            },
+            // Discount codes
+            'SAVE20': {
+                type: 'discount',
+                title: '20% DISCOUNT CODE',
+                description: 'USE CODE: SAVE20\nValid on all packs\nExpires: 31.12.2024',
+                discount: '20%'
+            },
+            'NEWUSER': {
+                type: 'discount',
+                title: '30% OFF - NEW USER',
+                description: 'USE CODE: NEWUSER\nFirst purchase only\nValid for 7 days',
+                discount: '30%'
+            },
+            'VIP50': {
+                type: 'discount',
+                title: 'VIP 50% DISCOUNT',
+                description: 'USE CODE: VIP50\nExclusive offer\nOne time use only',
+                discount: '50%'
+            }
+        };
+
+        function checkAccess() {
+            const code = document.getElementById('accessCode').value.toUpperCase().trim();
+            const message = document.getElementById('accessMessage');
+            const unlockContent = document.getElementById('unlockContent');
+            const unlockTitle = document.getElementById('unlockTitle');
+            const unlockDesc = document.getElementById('unlockDesc');
+            const downloadButtons = document.getElementById('downloadButtons');
+            
+            if (accessCodes[code]) {
+                const unlock = accessCodes[code];
+                
+                if (unlock.type === 'pack') {
+                    message.textContent = 'CODE VALID - PACK UNLOCKED!';
+                    message.className = 'access-message success';
+                    
+                    unlockTitle.textContent = unlock.title;
+                    unlockDesc.textContent = unlock.description;
+                    
+                    downloadButtons.innerHTML = '';
+                    unlock.downloads.forEach(download => {
+                        const btn = document.createElement('button');
+                        btn.className = 'download-btn';
+                        btn.textContent = download.label;
+                        btn.onclick = () => window.open(download.url, '_blank');
+                        downloadButtons.appendChild(btn);
+                    });
+                    
+                    unlockContent.classList.add('active');
+                } else if (unlock.type === 'discount') {
+                    message.textContent = `DISCOUNT CODE ACTIVATED - ${unlock.discount} OFF!`;
+                    message.className = 'access-message discount';
+                    
+                    unlockTitle.textContent = unlock.title;
+                    unlockDesc.textContent = unlock.description;
+                    downloadButtons.innerHTML = '<p style="color: #FFD24A; font-size: 9px; margin-top: 12px;">Copy the code and use it at checkout</p>';
+                    
+                    unlockContent.classList.add('active');
+                }
+            } else {
+                message.textContent = 'INVALID CODE!';
+                message.className = 'access-message error';
+                unlockContent.classList.remove('active');
+            }
+        }
+    </script>
 </body>
 </html>
-
-
-
-
-
