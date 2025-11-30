@@ -15,12 +15,29 @@
 
         body {
             font-family: 'Press Start 2P', cursive;
-            background: #0D0D10;
-            background-image: 
-                repeating-linear-gradient(0deg, #0D0D10 0px, #0D0D10 1px, #111114 1px, #111114 2px);
+            background: #050508; /* fallback color behind the city */
             color: #fff;
             font-size: 10px;
             overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Pixel city background */
+        .bg-city {
+            position: fixed;
+            inset: 0;
+            background: url("public/tapeta.png") center bottom no-repeat;
+            background-size: cover;
+            z-index: -2;
+        }
+
+        /* Night overlay (about 70% darkness) */
+        .bg-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(5, 0, 15, 0.7);
+            z-index: -1;
+            pointer-events: none;
         }
 
         /* PIXEL PLAYER HUD */
@@ -785,6 +802,8 @@
     </style>
 </head>
 <body>
+    <div class="bg-city"></div>
+    <div class="bg-overlay"></div>
     <!-- PIXEL PLAYER HUD -->
     <div class="player-hud">
         <div class="player-controls">
